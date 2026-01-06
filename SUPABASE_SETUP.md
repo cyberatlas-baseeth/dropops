@@ -9,55 +9,56 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 ## Database Setup
 
-Run these SQL commands in your Supabase SQL Editor:
+Run this SQL in your Supabase SQL Editor:
 
-### Airdrops Table
 ```sql
-create table if not exists airdrops (
-  id uuid default gen_random_uuid() primary key,
-  wallet_address text not null,
-  name text not null,
+-- Drop existing tables (if any)
+DROP TABLE IF EXISTS finance CASCADE;
+DROP TABLE IF EXISTS tasks CASCADE;
+DROP TABLE IF EXISTS airdrops CASCADE;
+
+-- Airdrops table (with wallet_address)
+CREATE TABLE airdrops (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  wallet_address text NOT NULL,
+  name text NOT NULL,
   network text,
-  status text default 'Tracking',
+  status text DEFAULT 'Tracking',
   notes text,
-  created_at timestamp with time zone default now()
+  created_at timestamp with time zone DEFAULT now()
 );
 
-create index if not exists idx_airdrops_wallet on airdrops(wallet_address);
-```
+CREATE INDEX idx_airdrops_wallet ON airdrops(wallet_address);
 
-### Tasks Table
-```sql
-create table if not exists tasks (
-  id uuid default gen_random_uuid() primary key,
-  airdrop_id uuid references airdrops(id) on delete cascade,
-  title text not null,
-  type text default 'One-time',
-  is_completed boolean default false,
+-- Tasks table
+CREATE TABLE tasks (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  airdrop_id uuid REFERENCES airdrops(id) ON DELETE CASCADE,
+  title text NOT NULL,
+  type text DEFAULT 'One-time',
+  is_completed boolean DEFAULT false,
   last_completed_at timestamp with time zone,
-  created_at timestamp with time zone default now()
+  created_at timestamp with time zone DEFAULT now()
 );
-```
 
-### Finance Table
-```sql
-create table if not exists finance (
-  id uuid default gen_random_uuid() primary key,
-  airdrop_id uuid references airdrops(id) on delete cascade,
-  cost_type text not null,
-  amount decimal(18,6) default 0,
-  created_at timestamp with time zone default now()
+-- Finance table
+CREATE TABLE finance (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  airdrop_id uuid REFERENCES airdrops(id) ON DELETE CASCADE,
+  cost_type text NOT NULL,
+  amount decimal(18,6) DEFAULT 0,
+  created_at timestamp with time zone DEFAULT now()
 );
-```
 
-### Disable RLS (for simplicity with wallet auth)
-```sql
-alter table airdrops disable row level security;
-alter table tasks disable row level security;
-alter table finance disable row level security;
+-- Disable RLS (wallet filtering is done at app level)
+ALTER TABLE airdrops DISABLE ROW LEVEL SECURITY;
+ALTER TABLE tasks DISABLE ROW LEVEL SECURITY;
+ALTER TABLE finance DISABLE ROW LEVEL SECURITY;
 ```
 
 ## Note
 
-This app uses MetaMask wallet authentication instead of Supabase Auth. 
+This app uses MetaMask wallet authentication instead of Supabase Auth.
 Data is filtered by `wallet_address` in the application layer.
+
+⚠️ **Warning:** The `DROP TABLE` commands will delete existing data. Back up your data first if needed!
