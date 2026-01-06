@@ -16,6 +16,16 @@ Run this SQL in your Supabase SQL Editor:
 DROP TABLE IF EXISTS finance CASCADE;
 DROP TABLE IF EXISTS tasks CASCADE;
 DROP TABLE IF EXISTS airdrops CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+-- Users table (wallet addresses)
+CREATE TABLE users (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  wallet_address text UNIQUE NOT NULL,
+  created_at timestamp with time zone DEFAULT now()
+);
+
+CREATE INDEX idx_users_wallet ON users(wallet_address);
 
 -- Airdrops table (with wallet_address)
 CREATE TABLE airdrops (
@@ -51,14 +61,25 @@ CREATE TABLE finance (
 );
 
 -- Disable RLS (wallet filtering is done at app level)
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE airdrops DISABLE ROW LEVEL SECURITY;
 ALTER TABLE tasks DISABLE ROW LEVEL SECURITY;
 ALTER TABLE finance DISABLE ROW LEVEL SECURITY;
 ```
 
+## Tables Overview
+
+| Table | Description |
+|-------|-------------|
+| `users` | Stores wallet addresses with registration date |
+| `airdrops` | Airdrop projects linked to wallet address |
+| `tasks` | Tasks for each airdrop |
+| `finance` | Cost and reward tracking |
+
 ## Note
 
-This app uses MetaMask wallet authentication instead of Supabase Auth.
-Data is filtered by `wallet_address` in the application layer.
+This app uses MetaMask wallet authentication. When a user connects their wallet:
+1. Their wallet address is saved to the `users` table
+2. The `created_at` timestamp shows when they first connected
 
 ⚠️ **Warning:** The `DROP TABLE` commands will delete existing data. Back up your data first if needed!

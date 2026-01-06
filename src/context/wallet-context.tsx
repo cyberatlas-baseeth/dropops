@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { BrowserProvider } from 'ethers';
 import { WALLET_CONFIG, WalletSession } from '@/lib/wallet/config';
+import { createClient } from '@/lib/supabase/client';
 
 interface WalletContextType {
     address: string | null;
@@ -58,6 +59,19 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         }
     }, [address]);
 
+    // Save user to Supabase
+    const saveUserToSupabase = async (walletAddress: string) => {
+        try {
+            const supabase = createClient();
+            await supabase.from('users').upsert(
+                { wallet_address: walletAddress.toLowerCase() },
+                { onConflict: 'wallet_address' }
+            );
+        } catch (err) {
+            console.error('Failed to save user:', err);
+        }
+    };
+
     const connect = async () => {
         if (typeof window === 'undefined' || !window.ethereum) {
             setError('Please install MetaMask to continue');
@@ -84,7 +98,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
             await signer.signMessage(message);
 
-            // Save session
+            // Save user to Supabase
+            await saveUserToSupabase(walletAddress);
+
+            // Save session locally
             const session: WalletSession = {
                 address: walletAddress,
                 connectedAt: Date.now(),

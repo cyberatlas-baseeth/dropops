@@ -50,7 +50,7 @@ export function Sidebar() {
             {/* Mobile menu button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed top-4 left-4 z-50 p-2 bg-card border border-border rounded-md lg:hidden"
+                className="fixed top-4 left-4 z-[110] p-2 bg-card border border-border rounded-md lg:hidden"
                 aria-label="Toggle menu"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -72,14 +72,14 @@ export function Sidebar() {
             {/* Backdrop */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                    className="fixed inset-0 bg-black/50 z-[90] lg:hidden"
                     onClick={() => setIsOpen(false)}
                 />
             )}
 
             {/* Sidebar */}
             <aside
-                className={`fixed left-0 top-0 h-full w-56 bg-card border-r border-border flex flex-col z-50 transition-transform lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed left-0 top-0 h-full w-56 bg-card border-r border-border flex flex-col z-[100] transition-transform lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 <div className="px-4 py-5 border-b border-border">
@@ -101,8 +101,8 @@ export function Sidebar() {
                                         href={item.href}
                                         onClick={() => setIsOpen(false)}
                                         className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive
-                                                ? 'bg-secondary text-foreground'
-                                                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                                            ? 'bg-secondary text-foreground'
+                                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                                             }`}
                                     >
                                         {item.icon}
