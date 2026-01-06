@@ -14,8 +14,9 @@ export default function DashboardLayout({
             <WalletGuard>
                 <div className="min-h-screen bg-background">
                     <Sidebar />
-                    <main className="lg:pl-56">
-                        <div className="p-4 pt-16 lg:p-8 lg:pt-8">{children}</div>
+                    {/* Main content with left margin for sidebar on desktop */}
+                    <main className="lg:ml-56">
+                        <div className="p-4 pt-16 lg:p-6 lg:pt-6">{children}</div>
                     </main>
                 </div>
             </WalletGuard>
