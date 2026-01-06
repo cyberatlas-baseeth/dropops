@@ -1,7 +1,7 @@
 'use client';
 
 import { WalletProvider } from '@/context/wallet-context';
-import { Sidebar } from '@/components/layout/sidebar';
+import { Topbar } from '@/components/layout/topbar';
 import { WalletGuard } from '@/components/auth/wallet-guard';
 
 export default function DashboardLayout({
@@ -13,10 +13,11 @@ export default function DashboardLayout({
         <WalletProvider>
             <WalletGuard>
                 <div className="min-h-screen bg-background">
-                    <Sidebar />
-                    {/* Main content with left margin for sidebar on desktop */}
-                    <main className="lg:ml-56">
-                        <div className="p-4 pt-16 lg:p-6 lg:pt-6">{children}</div>
+                    <Topbar />
+                    <main className="pt-16">
+                        <div className="max-w-7xl mx-auto px-6 py-8">
+                            {children}
+                        </div>
                     </main>
                 </div>
             </WalletGuard>
