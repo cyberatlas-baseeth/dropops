@@ -1,11 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { usePathname, useRouter } from 'next/navigation';
+import { useWallet } from '@/context/wallet-context';
+import { useState } from 'react';
 
 const navItems = [
     {
@@ -32,27 +30,19 @@ const navItems = [
     },
 ];
 
+function truncateAddress(address: string) {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
 export function Sidebar() {
     const pathname = usePathname();
     const router = useRouter();
-    const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
+    const { address, disconnect } = useWallet();
     const [isOpen, setIsOpen] = useState(false);
 
-    useEffect(() => {
-        try {
-            const client = createClient();
-            setSupabase(client);
-        } catch {
-            // Supabase not configured
-        }
-    }, []);
-
-    const handleSignOut = async () => {
-        if (supabase) {
-            await supabase.auth.signOut();
-        }
+    const handleDisconnect = () => {
+        disconnect();
         router.push('/login');
-        router.refresh();
     };
 
     return (
@@ -124,9 +114,18 @@ export function Sidebar() {
                     </ul>
                 </nav>
 
-                <div className="px-3 py-4 border-t border-border">
+                <div className="px-3 py-4 border-t border-border space-y-3">
+                    {/* Wallet address */}
+                    {address && (
+                        <div className="px-3 py-2 bg-muted rounded-md">
+                            <p className="text-xs text-muted-foreground mb-1">Connected Wallet</p>
+                            <p className="text-sm font-mono text-foreground">{truncateAddress(address)}</p>
+                        </div>
+                    )}
+
+                    {/* Disconnect button */}
                     <button
-                        onClick={handleSignOut}
+                        onClick={handleDisconnect}
                         className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-full"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -134,7 +133,7 @@ export function Sidebar() {
                             <polyline points="16 17 21 12 16 7" />
                             <line x1="21" y1="12" x2="9" y2="12" />
                         </svg>
-                        Sign out
+                        Disconnect
                     </button>
                 </div>
             </aside>

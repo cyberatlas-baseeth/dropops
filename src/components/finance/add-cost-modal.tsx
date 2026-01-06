@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,16 +18,15 @@ interface AddCostModalProps {
     isOpen: boolean;
     onClose: () => void;
     airdrops: Airdrop[];
+    onSuccess?: () => void;
 }
 
-export function AddCostModal({ isOpen, onClose, airdrops }: AddCostModalProps) {
+export function AddCostModal({ isOpen, onClose, airdrops, onSuccess }: AddCostModalProps) {
     const [airdropId, setAirdropId] = useState('');
     const [costType, setCostType] = useState<CostType>('Gas Fee');
     const [amount, setAmount] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const router = useRouter();
-    const supabase = createClient();
 
     const airdropOptions = [
         { value: '', label: 'Select airdrop' },
@@ -44,19 +42,20 @@ export function AddCostModal({ isOpen, onClose, airdrops }: AddCostModalProps) {
             if (!airdropId) throw new Error('Please select an airdrop');
             if (!amount || parseFloat(amount) <= 0) throw new Error('Please enter a valid amount');
 
-            const { error } = await supabase.from('finance').insert({
+            const supabase = createClient();
+            const { error: insertError } = await supabase.from('finance').insert({
                 airdrop_id: airdropId,
                 cost_type: costType,
                 amount: parseFloat(amount),
             });
 
-            if (error) throw error;
+            if (insertError) throw insertError;
 
             setAirdropId('');
             setCostType('Gas Fee');
             setAmount('');
             onClose();
-            router.refresh();
+            onSuccess?.();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to add entry');
         } finally {

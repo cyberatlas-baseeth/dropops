@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
 import { Task } from '@/types/database';
 
 interface TaskListProps {
     tasks: Task[];
     airdropId: string;
+    onUpdate?: () => void;
 }
 
 const typeColors: Record<string, string> = {
@@ -16,10 +16,8 @@ const typeColors: Record<string, string> = {
     'One-time': 'bg-gray-500/10 text-gray-600',
 };
 
-export function TaskList({ tasks, airdropId }: TaskListProps) {
+export function TaskList({ tasks, airdropId, onUpdate }: TaskListProps) {
     const [localTasks, setLocalTasks] = useState(tasks);
-    const router = useRouter();
-    const supabase = createClient();
 
     const handleToggle = async (task: Task) => {
         const newCompleted = !task.is_completed;
@@ -33,6 +31,7 @@ export function TaskList({ tasks, airdropId }: TaskListProps) {
             )
         );
 
+        const supabase = createClient();
         await supabase
             .from('tasks')
             .update({
@@ -41,13 +40,14 @@ export function TaskList({ tasks, airdropId }: TaskListProps) {
             })
             .eq('id', task.id);
 
-        router.refresh();
+        onUpdate?.();
     };
 
     const handleDelete = async (taskId: string) => {
         setLocalTasks((prev) => prev.filter((t) => t.id !== taskId));
+        const supabase = createClient();
         await supabase.from('tasks').delete().eq('id', taskId);
-        router.refresh();
+        onUpdate?.();
     };
 
     if (localTasks.length === 0) {

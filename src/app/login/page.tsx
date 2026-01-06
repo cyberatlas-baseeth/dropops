@@ -1,11 +1,14 @@
 'use client';
 
-import { AuthForm } from '@/components/auth/auth-form';
+import { WalletProvider } from '@/context/wallet-context';
+import { ConnectWallet } from '@/components/auth/connect-wallet';
 
 export default function LoginPage() {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background px-4">
-            <AuthForm mode="login" />
-        </div>
+        <WalletProvider>
+            <div className="min-h-screen flex items-center justify-center bg-background px-4">
+                <ConnectWallet />
+            </div>
+        </WalletProvider>
     );
 }

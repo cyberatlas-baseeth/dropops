@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useWallet } from '@/context/wallet-context';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,43 +36,46 @@ const networkOptions = [
 interface AddAirdropModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSuccess?: () => void;
 }
 
-export function AddAirdropModal({ isOpen, onClose }: AddAirdropModalProps) {
+export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalProps) {
+    const { address } = useWallet();
     const [name, setName] = useState('');
     const [network, setNetwork] = useState('');
     const [status, setStatus] = useState<AirdropStatus>('Tracking');
     const [notes, setNotes] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const router = useRouter();
-    const supabase = createClient();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!address) {
+            setError('Wallet not connected');
+            return;
+        }
+
         setError(null);
         setLoading(true);
 
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('Not authenticated');
-
-            const { error } = await supabase.from('airdrops').insert({
-                user_id: user.id,
+            const supabase = createClient();
+            const { error: insertError } = await supabase.from('airdrops').insert({
+                wallet_address: address.toLowerCase(),
                 name,
                 network: network || null,
                 status,
                 notes: notes || null,
             });
 
-            if (error) throw error;
+            if (insertError) throw insertError;
 
             setName('');
             setNetwork('');
             setStatus('Tracking');
             setNotes('');
             onClose();
-            router.refresh();
+            onSuccess?.();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to create airdrop');
         } finally {

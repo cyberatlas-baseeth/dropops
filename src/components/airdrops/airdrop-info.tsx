@@ -18,15 +18,15 @@ const statusOptions = [
 
 interface AirdropInfoProps {
     airdrop: Airdrop;
+    onUpdate?: () => void;
 }
 
-export function AirdropInfo({ airdrop }: AirdropInfoProps) {
+export function AirdropInfo({ airdrop, onUpdate }: AirdropInfoProps) {
     const [status, setStatus] = useState<AirdropStatus>(airdrop.status);
     const [notes, setNotes] = useState(airdrop.notes || '');
     const [saving, setSaving] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
     const router = useRouter();
-    const supabase = createClient();
 
     const handleStatusChange = (newStatus: AirdropStatus) => {
         setStatus(newStatus);
@@ -41,12 +41,13 @@ export function AirdropInfo({ airdrop }: AirdropInfoProps) {
     const handleSave = async () => {
         setSaving(true);
         try {
+            const supabase = createClient();
             await supabase
                 .from('airdrops')
                 .update({ status, notes })
                 .eq('id', airdrop.id);
             setHasChanges(false);
-            router.refresh();
+            onUpdate?.();
         } finally {
             setSaving(false);
         }
@@ -55,9 +56,9 @@ export function AirdropInfo({ airdrop }: AirdropInfoProps) {
     const handleDelete = async () => {
         if (!confirm('Are you sure you want to delete this airdrop?')) return;
 
+        const supabase = createClient();
         await supabase.from('airdrops').delete().eq('id', airdrop.id);
         router.push('/');
-        router.refresh();
     };
 
     return (

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
 import { TaskType } from '@/types/database';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -16,14 +15,13 @@ const typeOptions = [
 
 interface AddTaskFormProps {
     airdropId: string;
+    onSuccess?: () => void;
 }
 
-export function AddTaskForm({ airdropId }: AddTaskFormProps) {
+export function AddTaskForm({ airdropId, onSuccess }: AddTaskFormProps) {
     const [title, setTitle] = useState('');
     const [type, setType] = useState<TaskType>('One-time');
     const [loading, setLoading] = useState(false);
-    const router = useRouter();
-    const supabase = createClient();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,6 +29,7 @@ export function AddTaskForm({ airdropId }: AddTaskFormProps) {
 
         setLoading(true);
         try {
+            const supabase = createClient();
             await supabase.from('tasks').insert({
                 airdrop_id: airdropId,
                 title: title.trim(),
@@ -38,7 +37,7 @@ export function AddTaskForm({ airdropId }: AddTaskFormProps) {
             });
             setTitle('');
             setType('One-time');
-            router.refresh();
+            onSuccess?.();
         } finally {
             setLoading(false);
         }

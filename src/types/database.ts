@@ -6,7 +6,7 @@ export type CostType = 'Gas Fee' | 'Other' | 'Claimed Reward';
 
 export interface Airdrop {
   id: string;
-  user_id: string;
+  wallet_address: string;
   name: string;
   network: string | null;
   status: AirdropStatus;
