@@ -18,7 +18,10 @@ export default function DashboardPage() {
     const [networkFilter, setNetworkFilter] = useState('');
 
     const fetchAirdrops = async () => {
-        if (!address) return;
+        if (!address) {
+            setLoading(false);
+            return;
+        }
 
         try {
             const supabase = createClient();
@@ -55,42 +58,29 @@ export default function DashboardPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center py-12">
-                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <div className="flex items-center justify-center py-20">
+                <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
 
     return (
-        <>
-            <div className="flex items-center justify-between mb-6">
+        <div>
+            {/* Page Header */}
+            <div className="flex items-center justify-between mb-8">
                 <div>
                     <h1 className="text-2xl font-bold text-foreground">Airdrops</h1>
-                    <p className="text-muted-foreground text-sm mt-1">
+                    <p className="text-muted-foreground mt-1">
                         Track and manage your airdrop projects
                     </p>
                 </div>
                 <Button onClick={() => setIsModalOpen(true)}>
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="mr-2"
-                    >
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                    Add Airdrop
+                    + Add Airdrop
                 </Button>
             </div>
 
-            <div className="mb-4">
+            {/* Filters */}
+            <div className="mb-6">
                 <AirdropFilters
                     status={statusFilter}
                     network={networkFilter}
@@ -99,13 +89,15 @@ export default function DashboardPage() {
                 />
             </div>
 
+            {/* Airdrop Grid */}
             <AirdropTable airdrops={filteredAirdrops} />
 
+            {/* Add Modal */}
             <AddAirdropModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSuccess={handleAirdropAdded}
             />
-        </>
+        </div>
     );
 }
