@@ -11,6 +11,11 @@ export interface Airdrop {
   network: string | null;
   status: AirdropStatus;
   notes: string | null;
+  website: string | null;
+  funds: string | null;
+  estimated_tge: string | null;
+  estimated_value: string | null;
+  tasks_summary: string | null;
   created_at: string;
 }
 

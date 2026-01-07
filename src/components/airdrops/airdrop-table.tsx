@@ -15,20 +15,6 @@ const statusColors: Record<string, { bg: string; text: string }> = {
     'Dropped': { bg: 'bg-red-500/20', text: 'text-red-400' },
 };
 
-const networkColors: Record<string, string> = {
-    'Ethereum': 'bg-blue-600/20 text-blue-400 border-blue-500/30',
-    'Arbitrum': 'bg-blue-500/20 text-blue-300 border-blue-400/30',
-    'Optimism': 'bg-red-500/20 text-red-400 border-red-500/30',
-    'Base': 'bg-blue-600/20 text-blue-400 border-blue-500/30',
-    'Polygon': 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-    'Solana': 'bg-gradient-to-r from-purple-500/20 to-cyan-500/20 text-purple-300 border-purple-400/30',
-    'Sui': 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-    'Aptos': 'bg-teal-500/20 text-teal-400 border-teal-500/30',
-    'zkSync': 'bg-purple-600/20 text-purple-400 border-purple-500/30',
-    'Starknet': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-    'Other': 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-};
-
 export function AirdropTable({ airdrops }: AirdropTableProps) {
     if (airdrops.length === 0) {
         return (
@@ -61,79 +47,72 @@ export function AirdropTable({ airdrops }: AirdropTableProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {airdrops.map((airdrop) => {
                 const statusStyle = statusColors[airdrop.status] || { bg: 'bg-gray-500/20', text: 'text-gray-400' };
-                const networkStyle = networkColors[airdrop.network || 'Other'] || networkColors['Other'];
 
                 return (
-                    <div
+                    <Link
                         key={airdrop.id}
-                        className="bg-card border border-border rounded-xl p-5 hover:border-emerald-500/50 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/5 group"
+                        href={`/airdrop/${airdrop.id}`}
+                        className="block bg-card border border-border rounded-xl p-5 hover:border-emerald-500/50 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/5"
                     >
                         {/* Header */}
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center gap-3">
-                                {/* Project Icon */}
                                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 flex items-center justify-center">
                                     <span className="text-emerald-400 font-bold text-sm">
                                         {airdrop.name.substring(0, 2).toUpperCase()}
                                     </span>
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold text-foreground group-hover:text-emerald-400 transition-colors">
+                                    <h3 className="font-semibold text-foreground">
                                         {airdrop.name}
                                     </h3>
-                                    <p className="text-xs text-muted-foreground">
-                                        {new Date(airdrop.created_at).toLocaleDateString()}
-                                    </p>
+                                    {airdrop.network && (
+                                        <p className="text-xs text-muted-foreground">{airdrop.network}</p>
+                                    )}
                                 </div>
                             </div>
-
-                            {/* Status Badge */}
                             <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusStyle.bg} ${statusStyle.text}`}>
                                 {airdrop.status}
                             </span>
                         </div>
 
-                        {/* Network Badge */}
-                        {airdrop.network && (
-                            <div className="flex flex-wrap gap-2 mb-4">
-                                <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${networkStyle}`}>
-                                    {airdrop.network}
-                                </span>
+                        {/* Info Grid */}
+                        <div className="space-y-2 text-sm">
+                            {airdrop.funds && (
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Funds:</span>
+                                    <span className="text-foreground font-medium">{airdrop.funds}</span>
+                                </div>
+                            )}
+                            {airdrop.estimated_tge && (
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Est. TGE:</span>
+                                    <span className="text-foreground">{airdrop.estimated_tge}</span>
+                                </div>
+                            )}
+                            {airdrop.estimated_value && (
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Est. Value:</span>
+                                    <span className="text-emerald-400 font-medium">{airdrop.estimated_value}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Tasks Summary */}
+                        {airdrop.tasks_summary && (
+                            <div className="mt-4 pt-4 border-t border-border">
+                                <p className="text-xs text-muted-foreground mb-1">Tasks:</p>
+                                <p className="text-sm text-foreground line-clamp-2">{airdrop.tasks_summary}</p>
                             </div>
                         )}
 
-                        {/* Notes Preview */}
-                        {airdrop.notes && (
-                            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                                {airdrop.notes}
-                            </p>
+                        {/* Website */}
+                        {airdrop.website && (
+                            <div className="mt-3">
+                                <span className="text-xs text-muted-foreground truncate block">{airdrop.website}</span>
+                            </div>
                         )}
-
-                        {/* Divider */}
-                        <div className="border-t border-border my-4" />
-
-                        {/* Action Button */}
-                        <Link
-                            href={`/airdrop/${airdrop.id}`}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-emerald-600 to-cyan-600 text-white font-medium text-sm hover:from-emerald-500 hover:to-cyan-500 transition-all duration-200"
-                        >
-                            View Details
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <line x1="7" y1="17" x2="17" y2="7" />
-                                <polyline points="7 7 17 7 17 17" />
-                            </svg>
-                        </Link>
-                    </div>
+                    </Link>
                 );
             })}
         </div>

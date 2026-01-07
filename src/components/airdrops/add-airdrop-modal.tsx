@@ -44,9 +44,26 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
     const [name, setName] = useState('');
     const [network, setNetwork] = useState('');
     const [status, setStatus] = useState<AirdropStatus>('Tracking');
+    const [website, setWebsite] = useState('');
+    const [funds, setFunds] = useState('');
+    const [estimatedTge, setEstimatedTge] = useState('');
+    const [estimatedValue, setEstimatedValue] = useState('');
+    const [tasksSummary, setTasksSummary] = useState('');
     const [notes, setNotes] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const resetForm = () => {
+        setName('');
+        setNetwork('');
+        setStatus('Tracking');
+        setWebsite('');
+        setFunds('');
+        setEstimatedTge('');
+        setEstimatedValue('');
+        setTasksSummary('');
+        setNotes('');
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -65,15 +82,17 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
                 name,
                 network: network || null,
                 status,
+                website: website || null,
+                funds: funds || null,
+                estimated_tge: estimatedTge || null,
+                estimated_value: estimatedValue || null,
+                tasks_summary: tasksSummary || null,
                 notes: notes || null,
             });
 
             if (insertError) throw insertError;
 
-            setName('');
-            setNetwork('');
-            setStatus('Tracking');
-            setNotes('');
+            resetForm();
             onClose();
             onSuccess?.();
         } catch (err) {
@@ -88,36 +107,81 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
             <form onSubmit={handleSubmit} className="space-y-4">
                 <Input
                     id="name"
-                    label="Name"
-                    placeholder="e.g., LayerZero"
+                    label="Project Name *"
+                    placeholder="e.g., Base"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
                 />
 
-                <Select
-                    id="network"
-                    label="Network"
-                    options={networkOptions}
-                    value={network}
-                    onChange={(e) => setNetwork(e.target.value)}
+                <div className="grid grid-cols-2 gap-4">
+                    <Select
+                        id="network"
+                        label="Network"
+                        options={networkOptions}
+                        value={network}
+                        onChange={(e) => setNetwork(e.target.value)}
+                    />
+
+                    <Select
+                        id="status"
+                        label="Status"
+                        options={statusOptions}
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value as AirdropStatus)}
+                    />
+                </div>
+
+                <Input
+                    id="funds"
+                    label="Funds Raised"
+                    placeholder="e.g., $30.00M"
+                    value={funds}
+                    onChange={(e) => setFunds(e.target.value)}
                 />
 
-                <Select
-                    id="status"
-                    label="Status"
-                    options={statusOptions}
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value as AirdropStatus)}
+                <Input
+                    id="website"
+                    label="Website"
+                    placeholder="https://www.example.org/"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                    <Input
+                        id="estimated-tge"
+                        label="Estimated TGE"
+                        placeholder="e.g., 2027"
+                        value={estimatedTge}
+                        onChange={(e) => setEstimatedTge(e.target.value)}
+                    />
+
+                    <Input
+                        id="estimated-value"
+                        label="Est. Airdrop Value"
+                        placeholder="e.g., $5000-6000"
+                        value={estimatedValue}
+                        onChange={(e) => setEstimatedValue(e.target.value)}
+                    />
+                </div>
+
+                <Textarea
+                    id="tasks-summary"
+                    label="Tasks"
+                    placeholder="e.g., Baseposting, tx, increase followers"
+                    value={tasksSummary}
+                    onChange={(e) => setTasksSummary(e.target.value)}
+                    rows={2}
                 />
 
                 <Textarea
                     id="notes"
                     label="Notes"
-                    placeholder="Add any notes..."
+                    placeholder="Additional notes..."
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    rows={3}
+                    rows={2}
                 />
 
                 {error && (

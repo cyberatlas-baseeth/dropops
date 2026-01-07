@@ -27,13 +27,18 @@ CREATE TABLE users (
 
 CREATE INDEX idx_users_wallet ON users(wallet_address);
 
--- Airdrops table (with wallet_address)
+-- Airdrops table (with all fields)
 CREATE TABLE airdrops (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   wallet_address text NOT NULL,
   name text NOT NULL,
   network text,
   status text DEFAULT 'Tracking',
+  website text,
+  funds text,
+  estimated_tge text,
+  estimated_value text,
+  tasks_summary text,
   notes text,
   created_at timestamp with time zone DEFAULT now()
 );
@@ -67,19 +72,17 @@ ALTER TABLE tasks DISABLE ROW LEVEL SECURITY;
 ALTER TABLE finance DISABLE ROW LEVEL SECURITY;
 ```
 
-## Tables Overview
+## Airdrop Fields
 
-| Table | Description |
+| Field | Description |
 |-------|-------------|
-| `users` | Stores wallet addresses with registration date |
-| `airdrops` | Airdrop projects linked to wallet address |
-| `tasks` | Tasks for each airdrop |
-| `finance` | Cost and reward tracking |
+| `name` | Project name (e.g., Base) |
+| `network` | Blockchain network |
+| `funds` | Funds raised (e.g., $30.00M) |
+| `website` | Project website URL |
+| `estimated_tge` | Estimated Token Generation Event |
+| `estimated_value` | Expected airdrop value range |
+| `tasks_summary` | Summary of tasks to complete |
+| `notes` | Additional notes |
 
-## Note
-
-This app uses MetaMask wallet authentication. When a user connects their wallet:
-1. Their wallet address is saved to the `users` table
-2. The `created_at` timestamp shows when they first connected
-
-⚠️ **Warning:** The `DROP TABLE` commands will delete existing data. Back up your data first if needed!
+⚠️ **Warning:** The `DROP TABLE` commands will delete existing data!
