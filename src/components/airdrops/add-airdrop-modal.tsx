@@ -108,7 +108,7 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
                 <Input
                     id="name"
                     label="Project Name *"
-                    placeholder="e.g., Base"
+                    placeholder=""
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
@@ -125,7 +125,7 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
                 <Input
                     id="funds"
                     label="Funds Raised"
-                    placeholder="e.g., $30.00M"
+                    placeholder=""
                     value={funds}
                     onChange={(e) => setFunds(e.target.value)}
                 />
@@ -133,7 +133,7 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
                 <Input
                     id="website"
                     label="Website"
-                    placeholder="https://www.example.org/"
+                    placeholder=""
                     value={website}
                     onChange={(e) => setWebsite(e.target.value)}
                 />
@@ -142,7 +142,7 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
                     <Input
                         id="estimated-tge"
                         label="Estimated TGE"
-                        placeholder="e.g., 2027"
+                        placeholder=""
                         value={estimatedTge}
                         onChange={(e) => setEstimatedTge(e.target.value)}
                     />
@@ -150,7 +150,7 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
                     <Input
                         id="estimated-value"
                         label="Est. Airdrop Value"
-                        placeholder="e.g., $5000-6000"
+                        placeholder=""
                         value={estimatedValue}
                         onChange={(e) => setEstimatedValue(e.target.value)}
                     />
@@ -159,7 +159,7 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
                 <Textarea
                     id="tasks-summary"
                     label="Tasks"
-                    placeholder="e.g., Baseposting, tx, increase followers"
+                    placeholder=""
                     value={tasksSummary}
                     onChange={(e) => setTasksSummary(e.target.value)}
                     rows={2}
