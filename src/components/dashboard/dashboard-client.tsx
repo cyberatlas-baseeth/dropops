@@ -14,15 +14,13 @@ interface DashboardClientProps {
 export function DashboardClient({ airdrops }: DashboardClientProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [statusFilter, setStatusFilter] = useState('');
-    const [networkFilter, setNetworkFilter] = useState('');
 
     const filteredAirdrops = useMemo(() => {
         return airdrops.filter((airdrop) => {
             if (statusFilter && airdrop.status !== statusFilter) return false;
-            if (networkFilter && airdrop.network !== networkFilter) return false;
             return true;
         });
-    }, [airdrops, statusFilter, networkFilter]);
+    }, [airdrops, statusFilter]);
 
     return (
         <>
@@ -56,9 +54,7 @@ export function DashboardClient({ airdrops }: DashboardClientProps) {
             <div className="mb-4">
                 <AirdropFilters
                     status={statusFilter}
-                    network={networkFilter}
                     onStatusChange={setStatusFilter}
-                    onNetworkChange={setNetworkFilter}
                 />
             </div>
 
