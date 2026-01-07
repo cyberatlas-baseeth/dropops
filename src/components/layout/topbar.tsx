@@ -20,7 +20,7 @@ export function Topbar() {
 
     return (
         <header className="h-16 bg-card border-b border-border">
-            <div className="h-full max-w-7xl mx-auto px-6 flex items-center justify-between">
+            <div className="h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-lg flex items-center justify-center">
@@ -39,8 +39,8 @@ export function Topbar() {
                                 key={item.name}
                                 href={item.href}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
-                                        ? 'bg-emerald-500/10 text-emerald-500'
-                                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                                    ? 'bg-emerald-500/10 text-emerald-500'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                                     }`}
                             >
                                 {item.name}

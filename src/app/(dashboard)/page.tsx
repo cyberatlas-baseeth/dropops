@@ -128,12 +128,12 @@ export default function DashboardPage() {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
-                                ? 'border-emerald-500 text-emerald-500'
-                                : 'border-transparent text-muted-foreground hover:text-foreground'
+                            ? 'border-emerald-500 text-emerald-500'
+                            : 'border-transparent text-muted-foreground hover:text-foreground'
                             }`}
                     >
                         {tab.label}
-                        <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-muted">
+                        <span className="ml-3 px-2 py-0.5 text-xs rounded-full bg-muted">
                             {getCounts(tab.id)}
                         </span>
                     </button>
