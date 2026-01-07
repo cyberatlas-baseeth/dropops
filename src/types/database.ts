@@ -43,3 +43,10 @@ export interface Finance {
   amount: number;
   created_at: string;
 }
+
+export interface AirdropWithFinance extends Airdrop {
+  total_cost: number;
+  claimed_reward: number;
+  profit_loss: number;
+  roi_percent: number;
+}
