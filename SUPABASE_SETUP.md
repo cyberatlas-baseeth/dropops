@@ -15,6 +15,7 @@ Run this SQL in your Supabase SQL Editor:
 -- Drop existing tables (if any)
 DROP TABLE IF EXISTS finance CASCADE;
 DROP TABLE IF EXISTS tasks CASCADE;
+DROP TABLE IF EXISTS daily_tasks CASCADE;
 DROP TABLE IF EXISTS airdrops CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
@@ -45,7 +46,7 @@ CREATE TABLE airdrops (
 
 CREATE INDEX idx_airdrops_wallet ON airdrops(wallet_address);
 
--- Tasks table
+-- Tasks table (airdrop-specific tasks)
 CREATE TABLE tasks (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   airdrop_id uuid REFERENCES airdrops(id) ON DELETE CASCADE,
@@ -55,6 +56,17 @@ CREATE TABLE tasks (
   last_completed_at timestamp with time zone,
   created_at timestamp with time zone DEFAULT now()
 );
+
+-- Daily Tasks table (global daily tasks)
+CREATE TABLE daily_tasks (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  wallet_address text NOT NULL,
+  title text NOT NULL,
+  is_completed boolean DEFAULT false,
+  created_at timestamp with time zone DEFAULT now()
+);
+
+CREATE INDEX idx_daily_tasks_wallet ON daily_tasks(wallet_address);
 
 -- Finance table
 CREATE TABLE finance (
@@ -69,20 +81,8 @@ CREATE TABLE finance (
 ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE airdrops DISABLE ROW LEVEL SECURITY;
 ALTER TABLE tasks DISABLE ROW LEVEL SECURITY;
+ALTER TABLE daily_tasks DISABLE ROW LEVEL SECURITY;
 ALTER TABLE finance DISABLE ROW LEVEL SECURITY;
 ```
-
-## Airdrop Fields
-
-| Field | Description |
-|-------|-------------|
-| `name` | Project name (e.g., Base) |
-| `network` | Blockchain network |
-| `funds` | Funds raised (e.g., $30.00M) |
-| `website` | Project website URL |
-| `estimated_tge` | Estimated Token Generation Event |
-| `estimated_value` | Expected airdrop value range |
-| `tasks_summary` | Summary of tasks to complete |
-| `notes` | Additional notes |
 
 ⚠️ **Warning:** The `DROP TABLE` commands will delete existing data!

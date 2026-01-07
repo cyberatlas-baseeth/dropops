@@ -6,6 +6,7 @@ import { useWallet } from '@/context/wallet-context';
 
 const navItems = [
     { name: 'Dashboard', href: '/' },
+    { name: 'Tasks', href: '/tasks' },
     { name: 'Finance', href: '/finance' },
 ];
 
@@ -29,7 +30,7 @@ export function Topbar() {
                 </Link>
 
                 {/* Navigation */}
-                <nav className="flex items-center gap-1">
+                <nav className="flex items-center gap-4">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href ||
                             (item.href !== '/' && pathname.startsWith(item.href));
