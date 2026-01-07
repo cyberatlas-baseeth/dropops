@@ -32,14 +32,12 @@ export default function DashboardPage() {
         try {
             const supabase = createClient();
 
-            // Fetch airdrops
             const { data: airdropData } = await supabase
                 .from('airdrops')
                 .select('*')
                 .eq('wallet_address', address.toLowerCase())
                 .order('created_at', { ascending: false });
 
-            // Fetch steps for all airdrops
             const { data: stepsData } = await supabase
                 .from('steps')
                 .select('*');
@@ -47,7 +45,6 @@ export default function DashboardPage() {
             const airdropsRaw = (airdropData as Airdrop[]) || [];
             const stepsRaw = (stepsData as Step[]) || [];
 
-            // Combine airdrops with their steps
             const airdropsWithSteps: AirdropWithSteps[] = airdropsRaw.map(airdrop => {
                 const steps = stepsRaw.filter(s => s.airdrop_id === airdrop.id);
                 const completedSteps = steps.filter(s => s.is_completed).length;
@@ -98,7 +95,6 @@ export default function DashboardPage() {
         );
     }
 
-    // Count airdrops in each category
     const todoCount = airdrops.filter(a => a.progress_percent === 0).length;
     const inProgressCount = airdrops.filter(a => a.progress_percent > 0 && a.progress_percent < 100).length;
     const completedCount = airdrops.filter(a => a.progress_percent === 100).length;
@@ -126,18 +122,18 @@ export default function DashboardPage() {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 mb-6 border-b border-border">
+            <div className="flex gap-4 mb-6 border-b border-border">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
+                        className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
                                 ? 'border-emerald-500 text-emerald-500'
                                 : 'border-transparent text-muted-foreground hover:text-foreground'
                             }`}
                     >
                         {tab.label}
-                        <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-muted">
+                        <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-muted">
                             {getCounts(tab.id)}
                         </span>
                     </button>
@@ -145,7 +141,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Airdrop Grid */}
-            <AirdropTable airdrops={filteredAirdrops} />
+            <AirdropTable airdrops={filteredAirdrops} onStepToggle={fetchAirdrops} />
 
             {/* Add Modal */}
             <AddAirdropModal

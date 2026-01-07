@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Airdrop } from '@/types/database';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 
 interface AirdropInfoProps {
@@ -19,7 +18,6 @@ export function AirdropInfo({ airdrop, onUpdate }: AirdropInfoProps) {
     const [website, setWebsite] = useState(airdrop.website || '');
     const [estimatedTge, setEstimatedTge] = useState(airdrop.estimated_tge || '');
     const [estimatedValue, setEstimatedValue] = useState(airdrop.estimated_value || '');
-    const [stepsSummary, setStepsSummary] = useState(airdrop.steps_summary || '');
     const [saving, setSaving] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
     const router = useRouter();
@@ -38,7 +36,6 @@ export function AirdropInfo({ airdrop, onUpdate }: AirdropInfoProps) {
                     website: website || null,
                     estimated_tge: estimatedTge || null,
                     estimated_value: estimatedValue || null,
-                    steps_summary: stepsSummary || null,
                 })
                 .eq('id', airdrop.id);
             setHasChanges(false);
@@ -113,14 +110,6 @@ export function AirdropInfo({ airdrop, onUpdate }: AirdropInfoProps) {
                         onChange={(e) => { setEstimatedValue(e.target.value); markChanged(); }}
                     />
                 </div>
-
-                <Textarea
-                    id="steps-summary"
-                    label="Steps Summary"
-                    value={stepsSummary}
-                    onChange={(e) => { setStepsSummary(e.target.value); markChanged(); }}
-                    rows={2}
-                />
             </div>
         </div>
     );

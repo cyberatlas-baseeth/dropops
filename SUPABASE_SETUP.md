@@ -14,7 +14,6 @@ Run this SQL in your Supabase SQL Editor:
 ```sql
 -- Drop existing tables (if any)
 DROP TABLE IF EXISTS finance CASCADE;
-DROP TABLE IF EXISTS tasks CASCADE;
 DROP TABLE IF EXISTS steps CASCADE;
 DROP TABLE IF EXISTS daily_tasks CASCADE;
 DROP TABLE IF EXISTS airdrops CASCADE;
@@ -38,7 +37,6 @@ CREATE TABLE airdrops (
   funds text,
   estimated_tge text,
   estimated_value text,
-  steps_summary text,
   created_at timestamp with time zone DEFAULT now()
 );
 

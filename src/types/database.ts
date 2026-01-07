@@ -12,7 +12,6 @@ export interface Airdrop {
   funds: string | null;
   estimated_tge: string | null;
   estimated_value: string | null;
-  steps_summary: string | null;
   created_at: string;
 }
 

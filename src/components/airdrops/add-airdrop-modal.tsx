@@ -6,7 +6,6 @@ import { useWallet } from '@/context/wallet-context';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 
 interface AddAirdropModalProps {
     isOpen: boolean;
@@ -21,7 +20,7 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
     const [funds, setFunds] = useState('');
     const [estimatedTge, setEstimatedTge] = useState('');
     const [estimatedValue, setEstimatedValue] = useState('');
-    const [stepsSummary, setStepsSummary] = useState('');
+    const [steps, setSteps] = useState<string[]>(['']);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +30,23 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
         setFunds('');
         setEstimatedTge('');
         setEstimatedValue('');
-        setStepsSummary('');
+        setSteps(['']);
+    };
+
+    const addStepField = () => {
+        setSteps([...steps, '']);
+    };
+
+    const updateStep = (index: number, value: string) => {
+        const newSteps = [...steps];
+        newSteps[index] = value;
+        setSteps(newSteps);
+    };
+
+    const removeStep = (index: number) => {
+        if (steps.length > 1) {
+            setSteps(steps.filter((_, i) => i !== index));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -46,17 +61,34 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
 
         try {
             const supabase = createClient();
-            const { error: insertError } = await supabase.from('airdrops').insert({
-                wallet_address: address.toLowerCase(),
-                name,
-                website: website || null,
-                funds: funds || null,
-                estimated_tge: estimatedTge || null,
-                estimated_value: estimatedValue || null,
-                steps_summary: stepsSummary || null,
-            });
+
+            // Create airdrop
+            const { data: airdropData, error: insertError } = await supabase
+                .from('airdrops')
+                .insert({
+                    wallet_address: address.toLowerCase(),
+                    name,
+                    website: website || null,
+                    funds: funds || null,
+                    estimated_tge: estimatedTge || null,
+                    estimated_value: estimatedValue || null,
+                })
+                .select('id')
+                .single();
 
             if (insertError) throw insertError;
+
+            // Add steps
+            const validSteps = steps.filter(s => s.trim());
+            if (validSteps.length > 0 && airdropData) {
+                await supabase.from('steps').insert(
+                    validSteps.map(title => ({
+                        airdrop_id: airdropData.id,
+                        title: title.trim(),
+                        is_completed: false,
+                    }))
+                );
+            }
 
             resetForm();
             onClose();
@@ -114,14 +146,39 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
                     />
                 </div>
 
-                <Textarea
-                    id="steps-summary"
-                    label="Steps"
-                    placeholder=""
-                    value={stepsSummary}
-                    onChange={(e) => setStepsSummary(e.target.value)}
-                    rows={2}
-                />
+                {/* Steps */}
+                <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">Steps</label>
+                    <div className="space-y-2">
+                        {steps.map((step, index) => (
+                            <div key={index} className="flex gap-2">
+                                <input
+                                    type="text"
+                                    placeholder={`Step ${index + 1}`}
+                                    value={step}
+                                    onChange={(e) => updateStep(index, e.target.value)}
+                                    className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                                />
+                                {steps.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removeStep(index)}
+                                        className="px-2 text-muted-foreground hover:text-red-500"
+                                    >
+                                        ×
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                    <button
+                        type="button"
+                        onClick={addStepField}
+                        className="mt-2 text-sm text-emerald-500 hover:text-emerald-400"
+                    >
+                        + Add Step
+                    </button>
+                </div>
 
                 {error && (
                     <div className="p-3 text-sm bg-destructive/10 text-destructive rounded-md">
