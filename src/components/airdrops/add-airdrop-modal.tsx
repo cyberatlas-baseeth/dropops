@@ -114,23 +114,13 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
                     required
                 />
 
-                <div className="grid grid-cols-2 gap-4">
-                    <Select
-                        id="network"
-                        label="Network"
-                        options={networkOptions}
-                        value={network}
-                        onChange={(e) => setNetwork(e.target.value)}
-                    />
-
-                    <Select
-                        id="status"
-                        label="Status"
-                        options={statusOptions}
-                        value={status}
-                        onChange={(e) => setStatus(e.target.value as AirdropStatus)}
-                    />
-                </div>
+                <Select
+                    id="status"
+                    label="Status"
+                    options={statusOptions}
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as AirdropStatus)}
+                />
 
                 <Input
                     id="funds"
