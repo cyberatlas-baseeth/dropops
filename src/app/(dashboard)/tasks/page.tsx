@@ -13,6 +13,123 @@ interface Task {
     created_at: string;
 }
 
+interface TaskBoxProps {
+    title: string;
+    icon: React.ReactNode;
+    tasks: Task[];
+    newTask: string;
+    setNewTask: (v: string) => void;
+    adding: boolean;
+    onAdd: () => void;
+    onToggle: (taskId: string, isCompleted: boolean) => void;
+    onDelete: (taskId: string) => void;
+}
+
+function TaskBox({
+    title,
+    icon,
+    tasks,
+    newTask,
+    setNewTask,
+    adding,
+    onAdd,
+    onToggle,
+    onDelete,
+}: TaskBoxProps) {
+    const completedCount = tasks.filter(t => t.is_completed).length;
+
+    return (
+        <div className="bg-card border border-border rounded-xl p-6">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center">
+                    {icon}
+                </div>
+                <div>
+                    <h2 className="font-semibold text-foreground">{title}</h2>
+                    <p className="text-xs text-muted-foreground">
+                        {completedCount} of {tasks.length} completed
+                    </p>
+                </div>
+                {tasks.length > 0 && (
+                    <div className="ml-auto w-24 h-2 bg-muted rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all"
+                            style={{ width: `${tasks.length > 0 ? (completedCount / tasks.length) * 100 : 0}%` }}
+                        />
+                    </div>
+                )}
+            </div>
+
+            {/* Add Task Form */}
+            <form
+                onSubmit={(e) => { e.preventDefault(); onAdd(); }}
+                className="flex gap-2 mb-4"
+            >
+                <input
+                    type="text"
+                    placeholder="Add a new task..."
+                    value={newTask}
+                    onChange={(e) => setNewTask(e.target.value)}
+                    className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                />
+                <button
+                    type="submit"
+                    disabled={adding || !newTask.trim()}
+                    className="px-3 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                    {adding ? '...' : 'Add'}
+                </button>
+            </form>
+
+            {/* Task List */}
+            {tasks.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground text-sm">
+                    <p>No tasks yet</p>
+                </div>
+            ) : (
+                <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {tasks.map((task) => (
+                        <div
+                            key={task.id}
+                            className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${task.is_completed
+                                ? 'bg-emerald-500/5 border-emerald-500/20'
+                                : 'bg-background border-border hover:border-muted-foreground/30'
+                                }`}
+                        >
+                            <button
+                                onClick={() => onToggle(task.id, task.is_completed)}
+                                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors flex-shrink-0 ${task.is_completed
+                                    ? 'bg-emerald-500 border-emerald-500'
+                                    : 'border-muted-foreground/50 hover:border-emerald-500'
+                                    }`}
+                            >
+                                {task.is_completed && (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                )}
+                            </button>
+                            <span className={`flex-1 text-sm ${task.is_completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                                {task.title}
+                            </span>
+                            <button
+                                onClick={() => onDelete(task.id)}
+                                className="p-1 text-muted-foreground hover:text-red-500 transition-colors flex-shrink-0"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function TasksPage() {
     const { address } = useWallet();
     const [dailyTasks, setDailyTasks] = useState<Task[]>([]);
@@ -51,55 +168,81 @@ export default function TasksPage() {
         fetchTasks();
     }, [address]);
 
-    const addTask = async (title: string, taskType: 'daily' | 'todo') => {
-        if (!address || !title.trim()) return;
-
-        const setAdding = taskType === 'daily' ? setAddingDaily : setAddingTodo;
-        const setNewTask = taskType === 'daily' ? setNewDailyTask : setNewTodoTask;
-
-        setAdding(true);
+    const addDailyTask = async () => {
+        if (!address || !newDailyTask.trim()) return;
+        setAddingDaily(true);
         try {
             const supabase = createClient();
             await supabase.from('daily_tasks').insert({
                 wallet_address: address.toLowerCase(),
-                title: title.trim(),
+                title: newDailyTask.trim(),
                 is_completed: false,
-                task_type: taskType,
+                task_type: 'daily',
             });
-            setNewTask('');
+            setNewDailyTask('');
             fetchTasks();
         } catch (error) {
             console.error('Failed to add task:', error);
         } finally {
-            setAdding(false);
+            setAddingDaily(false);
         }
     };
 
-    const toggleTask = async (taskId: string, isCompleted: boolean, taskType: 'daily' | 'todo') => {
+    const addTodoTask = async () => {
+        if (!address || !newTodoTask.trim()) return;
+        setAddingTodo(true);
         try {
             const supabase = createClient();
-            await supabase
-                .from('daily_tasks')
-                .update({ is_completed: !isCompleted })
-                .eq('id', taskId);
+            await supabase.from('daily_tasks').insert({
+                wallet_address: address.toLowerCase(),
+                title: newTodoTask.trim(),
+                is_completed: false,
+                task_type: 'todo',
+            });
+            setNewTodoTask('');
+            fetchTasks();
+        } catch (error) {
+            console.error('Failed to add task:', error);
+        } finally {
+            setAddingTodo(false);
+        }
+    };
 
-            const setTasks = taskType === 'daily' ? setDailyTasks : setTodoTasks;
-            const tasks = taskType === 'daily' ? dailyTasks : todoTasks;
-            setTasks(tasks.map(t =>
-                t.id === taskId ? { ...t, is_completed: !isCompleted } : t
-            ));
+    const toggleDailyTask = async (taskId: string, isCompleted: boolean) => {
+        try {
+            const supabase = createClient();
+            await supabase.from('daily_tasks').update({ is_completed: !isCompleted }).eq('id', taskId);
+            setDailyTasks(dailyTasks.map(t => t.id === taskId ? { ...t, is_completed: !isCompleted } : t));
         } catch (error) {
             console.error('Failed to toggle task:', error);
         }
     };
 
-    const deleteTask = async (taskId: string, taskType: 'daily' | 'todo') => {
+    const toggleTodoTask = async (taskId: string, isCompleted: boolean) => {
+        try {
+            const supabase = createClient();
+            await supabase.from('daily_tasks').update({ is_completed: !isCompleted }).eq('id', taskId);
+            setTodoTasks(todoTasks.map(t => t.id === taskId ? { ...t, is_completed: !isCompleted } : t));
+        } catch (error) {
+            console.error('Failed to toggle task:', error);
+        }
+    };
+
+    const deleteDailyTask = async (taskId: string) => {
         try {
             const supabase = createClient();
             await supabase.from('daily_tasks').delete().eq('id', taskId);
-            const setTasks = taskType === 'daily' ? setDailyTasks : setTodoTasks;
-            const tasks = taskType === 'daily' ? dailyTasks : todoTasks;
-            setTasks(tasks.filter(t => t.id !== taskId));
+            setDailyTasks(dailyTasks.filter(t => t.id !== taskId));
+        } catch (error) {
+            console.error('Failed to delete task:', error);
+        }
+    };
+
+    const deleteTodoTask = async (taskId: string) => {
+        try {
+            const supabase = createClient();
+            await supabase.from('daily_tasks').delete().eq('id', taskId);
+            setTodoTasks(todoTasks.filter(t => t.id !== taskId));
         } catch (error) {
             console.error('Failed to delete task:', error);
         }
@@ -112,119 +255,6 @@ export default function TasksPage() {
             </div>
         );
     }
-
-    const TaskBox = ({
-        title,
-        icon,
-        tasks,
-        newTask,
-        setNewTask,
-        adding,
-        onAdd,
-        taskType,
-    }: {
-        title: string;
-        icon: React.ReactNode;
-        tasks: Task[];
-        newTask: string;
-        setNewTask: (v: string) => void;
-        adding: boolean;
-        onAdd: () => void;
-        taskType: 'daily' | 'todo';
-    }) => {
-        const completedCount = tasks.filter(t => t.is_completed).length;
-
-        return (
-            <div className="bg-card border border-border rounded-xl p-6">
-                {/* Header */}
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center">
-                        {icon}
-                    </div>
-                    <div>
-                        <h2 className="font-semibold text-foreground">{title}</h2>
-                        <p className="text-xs text-muted-foreground">
-                            {completedCount} of {tasks.length} completed
-                        </p>
-                    </div>
-                    {tasks.length > 0 && (
-                        <div className="ml-auto w-24 h-2 bg-muted rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all"
-                                style={{ width: `${tasks.length > 0 ? (completedCount / tasks.length) * 100 : 0}%` }}
-                            />
-                        </div>
-                    )}
-                </div>
-
-                {/* Add Task Form */}
-                <form
-                    onSubmit={(e) => { e.preventDefault(); onAdd(); }}
-                    className="flex gap-2 mb-4"
-                >
-                    <input
-                        type="text"
-                        placeholder="Add a new task..."
-                        value={newTask}
-                        onChange={(e) => setNewTask(e.target.value)}
-                        className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                    />
-                    <button
-                        type="submit"
-                        disabled={adding || !newTask.trim()}
-                        className="px-3 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
-                    >
-                        {adding ? '...' : 'Add'}
-                    </button>
-                </form>
-
-                {/* Task List */}
-                {tasks.length === 0 ? (
-                    <div className="text-center py-6 text-muted-foreground text-sm">
-                        <p>No tasks yet</p>
-                    </div>
-                ) : (
-                    <div className="space-y-2 max-h-80 overflow-y-auto">
-                        {tasks.map((task) => (
-                            <div
-                                key={task.id}
-                                className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${task.is_completed
-                                    ? 'bg-emerald-500/5 border-emerald-500/20'
-                                    : 'bg-background border-border hover:border-muted-foreground/30'
-                                    }`}
-                            >
-                                <button
-                                    onClick={() => toggleTask(task.id, task.is_completed, taskType)}
-                                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors flex-shrink-0 ${task.is_completed
-                                        ? 'bg-emerald-500 border-emerald-500'
-                                        : 'border-muted-foreground/50 hover:border-emerald-500'
-                                        }`}
-                                >
-                                    {task.is_completed && (
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                    )}
-                                </button>
-                                <span className={`flex-1 text-sm ${task.is_completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                                    {task.title}
-                                </span>
-                                <button
-                                    onClick={() => deleteTask(task.id, taskType)}
-                                    className="p-1 text-muted-foreground hover:text-red-500 transition-colors flex-shrink-0"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18" />
-                                        <line x1="6" y1="6" x2="18" y2="18" />
-                                    </svg>
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        );
-    };
 
     return (
         <div>
@@ -251,8 +281,9 @@ export default function TasksPage() {
                     newTask={newDailyTask}
                     setNewTask={setNewDailyTask}
                     adding={addingDaily}
-                    onAdd={() => addTask(newDailyTask, 'daily')}
-                    taskType="daily"
+                    onAdd={addDailyTask}
+                    onToggle={toggleDailyTask}
+                    onDelete={deleteDailyTask}
                 />
 
                 {/* To-Do List */}
@@ -268,8 +299,9 @@ export default function TasksPage() {
                     newTask={newTodoTask}
                     setNewTask={setNewTodoTask}
                     adding={addingTodo}
-                    onAdd={() => addTask(newTodoTask, 'todo')}
-                    taskType="todo"
+                    onAdd={addTodoTask}
+                    onToggle={toggleTodoTask}
+                    onDelete={deleteTodoTask}
                 />
             </div>
         </div>
