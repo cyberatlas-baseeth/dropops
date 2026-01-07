@@ -15,7 +15,6 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [statusFilter, setStatusFilter] = useState('');
-    const [networkFilter, setNetworkFilter] = useState('');
 
     const fetchAirdrops = async () => {
         if (!address) {
@@ -46,10 +45,9 @@ export default function DashboardPage() {
     const filteredAirdrops = useMemo(() => {
         return airdrops.filter((airdrop) => {
             if (statusFilter && airdrop.status !== statusFilter) return false;
-            if (networkFilter && airdrop.network !== networkFilter) return false;
             return true;
         });
-    }, [airdrops, statusFilter, networkFilter]);
+    }, [airdrops, statusFilter]);
 
     const handleAirdropAdded = () => {
         setIsModalOpen(false);
@@ -83,9 +81,7 @@ export default function DashboardPage() {
             <div className="mb-6">
                 <AirdropFilters
                     status={statusFilter}
-                    network={networkFilter}
                     onStatusChange={setStatusFilter}
-                    onNetworkChange={setNetworkFilter}
                 />
             </div>
 
