@@ -15,6 +15,7 @@ Run this SQL in your Supabase SQL Editor:
 -- Drop existing tables (if any)
 DROP TABLE IF EXISTS finance CASCADE;
 DROP TABLE IF EXISTS tasks CASCADE;
+DROP TABLE IF EXISTS steps CASCADE;
 DROP TABLE IF EXISTS daily_tasks CASCADE;
 DROP TABLE IF EXISTS airdrops CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
@@ -28,34 +29,31 @@ CREATE TABLE users (
 
 CREATE INDEX idx_users_wallet ON users(wallet_address);
 
--- Airdrops table (with all fields)
+-- Airdrops table
 CREATE TABLE airdrops (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   wallet_address text NOT NULL,
   name text NOT NULL,
-  network text,
-  status text DEFAULT 'Tracking',
   website text,
   funds text,
   estimated_tge text,
   estimated_value text,
-  tasks_summary text,
-  notes text,
+  steps_summary text,
   created_at timestamp with time zone DEFAULT now()
 );
 
 CREATE INDEX idx_airdrops_wallet ON airdrops(wallet_address);
 
--- Tasks table (airdrop-specific tasks)
-CREATE TABLE tasks (
+-- Steps table (airdrop-specific steps with checkboxes)
+CREATE TABLE steps (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   airdrop_id uuid REFERENCES airdrops(id) ON DELETE CASCADE,
   title text NOT NULL,
-  type text DEFAULT 'One-time',
   is_completed boolean DEFAULT false,
-  last_completed_at timestamp with time zone,
   created_at timestamp with time zone DEFAULT now()
 );
+
+CREATE INDEX idx_steps_airdrop ON steps(airdrop_id);
 
 -- Daily Tasks table (global daily tasks and to-do list)
 CREATE TABLE daily_tasks (
@@ -81,7 +79,7 @@ CREATE TABLE finance (
 -- Disable RLS (wallet filtering is done at app level)
 ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE airdrops DISABLE ROW LEVEL SECURITY;
-ALTER TABLE tasks DISABLE ROW LEVEL SECURITY;
+ALTER TABLE steps DISABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_tasks DISABLE ROW LEVEL SECURITY;
 ALTER TABLE finance DISABLE ROW LEVEL SECURITY;
 ```

@@ -6,32 +6,7 @@ import { useWallet } from '@/context/wallet-context';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { AirdropStatus } from '@/types/database';
-
-const statusOptions = [
-    { value: 'Tracking', label: 'Tracking' },
-    { value: 'Active', label: 'Active' },
-    { value: 'Snapshot Taken', label: 'Snapshot Taken' },
-    { value: 'Claimed', label: 'Claimed' },
-    { value: 'Dropped', label: 'Dropped' },
-];
-
-const networkOptions = [
-    { value: '', label: 'Select network' },
-    { value: 'Ethereum', label: 'Ethereum' },
-    { value: 'Arbitrum', label: 'Arbitrum' },
-    { value: 'Optimism', label: 'Optimism' },
-    { value: 'Base', label: 'Base' },
-    { value: 'Polygon', label: 'Polygon' },
-    { value: 'Solana', label: 'Solana' },
-    { value: 'Sui', label: 'Sui' },
-    { value: 'Aptos', label: 'Aptos' },
-    { value: 'zkSync', label: 'zkSync' },
-    { value: 'Starknet', label: 'Starknet' },
-    { value: 'Other', label: 'Other' },
-];
 
 interface AddAirdropModalProps {
     isOpen: boolean;
@@ -42,27 +17,21 @@ interface AddAirdropModalProps {
 export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalProps) {
     const { address } = useWallet();
     const [name, setName] = useState('');
-    const [network, setNetwork] = useState('');
-    const [status, setStatus] = useState<AirdropStatus>('Tracking');
     const [website, setWebsite] = useState('');
     const [funds, setFunds] = useState('');
     const [estimatedTge, setEstimatedTge] = useState('');
     const [estimatedValue, setEstimatedValue] = useState('');
-    const [tasksSummary, setTasksSummary] = useState('');
-    const [notes, setNotes] = useState('');
+    const [stepsSummary, setStepsSummary] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const resetForm = () => {
         setName('');
-        setNetwork('');
-        setStatus('Tracking');
         setWebsite('');
         setFunds('');
         setEstimatedTge('');
         setEstimatedValue('');
-        setTasksSummary('');
-        setNotes('');
+        setStepsSummary('');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -80,14 +49,11 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
             const { error: insertError } = await supabase.from('airdrops').insert({
                 wallet_address: address.toLowerCase(),
                 name,
-                network: network || null,
-                status,
                 website: website || null,
                 funds: funds || null,
                 estimated_tge: estimatedTge || null,
                 estimated_value: estimatedValue || null,
-                tasks_summary: tasksSummary || null,
-                notes: notes || null,
+                steps_summary: stepsSummary || null,
             });
 
             if (insertError) throw insertError;
@@ -112,14 +78,6 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                />
-
-                <Select
-                    id="status"
-                    label="Status"
-                    options={statusOptions}
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value as AirdropStatus)}
                 />
 
                 <Input
@@ -157,20 +115,11 @@ export function AddAirdropModal({ isOpen, onClose, onSuccess }: AddAirdropModalP
                 </div>
 
                 <Textarea
-                    id="tasks-summary"
-                    label="Tasks"
+                    id="steps-summary"
+                    label="Steps"
                     placeholder=""
-                    value={tasksSummary}
-                    onChange={(e) => setTasksSummary(e.target.value)}
-                    rows={2}
-                />
-
-                <Textarea
-                    id="notes"
-                    label="Notes"
-                    placeholder="Additional notes..."
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
+                    value={stepsSummary}
+                    onChange={(e) => setStepsSummary(e.target.value)}
                     rows={2}
                 />
 

@@ -3,18 +3,25 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useWallet } from '@/context/wallet-context';
-import { Airdrop } from '@/types/database';
+import { Airdrop, Step, AirdropWithSteps } from '@/types/database';
 import { Button } from '@/components/ui/button';
 import { AirdropTable } from '@/components/airdrops/airdrop-table';
-import { AirdropFilters } from '@/components/airdrops/airdrop-filters';
 import { AddAirdropModal } from '@/components/airdrops/add-airdrop-modal';
+
+type TabType = 'todo' | 'in_progress' | 'completed';
+
+const tabs: { id: TabType; label: string }[] = [
+    { id: 'todo', label: 'To-Do' },
+    { id: 'in_progress', label: 'In Progress' },
+    { id: 'completed', label: 'Completed' },
+];
 
 export default function DashboardPage() {
     const { address } = useWallet();
-    const [airdrops, setAirdrops] = useState<Airdrop[]>([]);
+    const [airdrops, setAirdrops] = useState<AirdropWithSteps[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [statusFilter, setStatusFilter] = useState('');
+    const [activeTab, setActiveTab] = useState<TabType>('todo');
 
     const fetchAirdrops = async () => {
         if (!address) {
@@ -24,13 +31,39 @@ export default function DashboardPage() {
 
         try {
             const supabase = createClient();
-            const { data } = await supabase
+
+            // Fetch airdrops
+            const { data: airdropData } = await supabase
                 .from('airdrops')
                 .select('*')
                 .eq('wallet_address', address.toLowerCase())
                 .order('created_at', { ascending: false });
 
-            setAirdrops((data as Airdrop[]) || []);
+            // Fetch steps for all airdrops
+            const { data: stepsData } = await supabase
+                .from('steps')
+                .select('*');
+
+            const airdropsRaw = (airdropData as Airdrop[]) || [];
+            const stepsRaw = (stepsData as Step[]) || [];
+
+            // Combine airdrops with their steps
+            const airdropsWithSteps: AirdropWithSteps[] = airdropsRaw.map(airdrop => {
+                const steps = stepsRaw.filter(s => s.airdrop_id === airdrop.id);
+                const completedSteps = steps.filter(s => s.is_completed).length;
+                const totalSteps = steps.length;
+                const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+
+                return {
+                    ...airdrop,
+                    steps,
+                    completed_steps: completedSteps,
+                    total_steps: totalSteps,
+                    progress_percent: progressPercent,
+                };
+            });
+
+            setAirdrops(airdropsWithSteps);
         } catch (error) {
             console.error('Failed to fetch airdrops:', error);
         } finally {
@@ -44,10 +77,13 @@ export default function DashboardPage() {
 
     const filteredAirdrops = useMemo(() => {
         return airdrops.filter((airdrop) => {
-            if (statusFilter && airdrop.status !== statusFilter) return false;
+            const percent = airdrop.progress_percent;
+            if (activeTab === 'todo') return percent === 0;
+            if (activeTab === 'in_progress') return percent > 0 && percent < 100;
+            if (activeTab === 'completed') return percent === 100;
             return true;
         });
-    }, [airdrops, statusFilter]);
+    }, [airdrops, activeTab]);
 
     const handleAirdropAdded = () => {
         setIsModalOpen(false);
@@ -62,10 +98,22 @@ export default function DashboardPage() {
         );
     }
 
+    // Count airdrops in each category
+    const todoCount = airdrops.filter(a => a.progress_percent === 0).length;
+    const inProgressCount = airdrops.filter(a => a.progress_percent > 0 && a.progress_percent < 100).length;
+    const completedCount = airdrops.filter(a => a.progress_percent === 100).length;
+
+    const getCounts = (tab: TabType) => {
+        if (tab === 'todo') return todoCount;
+        if (tab === 'in_progress') return inProgressCount;
+        if (tab === 'completed') return completedCount;
+        return 0;
+    };
+
     return (
         <div>
             {/* Page Header */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-foreground">Airdrops</h1>
                     <p className="text-muted-foreground mt-1">
@@ -77,12 +125,23 @@ export default function DashboardPage() {
                 </Button>
             </div>
 
-            {/* Filters */}
-            <div className="mb-6">
-                <AirdropFilters
-                    status={statusFilter}
-                    onStatusChange={setStatusFilter}
-                />
+            {/* Tabs */}
+            <div className="flex gap-2 mb-6 border-b border-border">
+                {tabs.map((tab) => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
+                                ? 'border-emerald-500 text-emerald-500'
+                                : 'border-transparent text-muted-foreground hover:text-foreground'
+                            }`}
+                    >
+                        {tab.label}
+                        <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-muted">
+                            {getCounts(tab.id)}
+                        </span>
+                    </button>
+                ))}
             </div>
 
             {/* Airdrop Grid */}

@@ -3,19 +3,10 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { Airdrop, AirdropStatus } from '@/types/database';
-import { Select } from '@/components/ui/select';
+import { Airdrop } from '@/types/database';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-
-const statusOptions = [
-    { value: 'Tracking', label: 'Tracking' },
-    { value: 'Active', label: 'Active' },
-    { value: 'Snapshot Taken', label: 'Snapshot Taken' },
-    { value: 'Claimed', label: 'Claimed' },
-    { value: 'Dropped', label: 'Dropped' },
-];
 
 interface AirdropInfoProps {
     airdrop: Airdrop;
@@ -24,13 +15,11 @@ interface AirdropInfoProps {
 
 export function AirdropInfo({ airdrop, onUpdate }: AirdropInfoProps) {
     const [name, setName] = useState(airdrop.name);
-    const [status, setStatus] = useState<AirdropStatus>(airdrop.status);
     const [funds, setFunds] = useState(airdrop.funds || '');
     const [website, setWebsite] = useState(airdrop.website || '');
     const [estimatedTge, setEstimatedTge] = useState(airdrop.estimated_tge || '');
     const [estimatedValue, setEstimatedValue] = useState(airdrop.estimated_value || '');
-    const [tasksSummary, setTasksSummary] = useState(airdrop.tasks_summary || '');
-    const [notes, setNotes] = useState(airdrop.notes || '');
+    const [stepsSummary, setStepsSummary] = useState(airdrop.steps_summary || '');
     const [saving, setSaving] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
     const router = useRouter();
@@ -45,13 +34,11 @@ export function AirdropInfo({ airdrop, onUpdate }: AirdropInfoProps) {
                 .from('airdrops')
                 .update({
                     name,
-                    status,
                     funds: funds || null,
                     website: website || null,
                     estimated_tge: estimatedTge || null,
                     estimated_value: estimatedValue || null,
-                    tasks_summary: tasksSummary || null,
-                    notes: notes || null,
+                    steps_summary: stepsSummary || null,
                 })
                 .eq('id', airdrop.id);
             setHasChanges(false);
@@ -90,23 +77,12 @@ export function AirdropInfo({ airdrop, onUpdate }: AirdropInfoProps) {
             </div>
 
             <div className="grid gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                    <Input
-                        id="name"
-                        label="Project Name"
-                        value={name}
-                        onChange={(e) => { setName(e.target.value); markChanged(); }}
-                    />
-                    <div className="w-48">
-                        <Select
-                            id="status"
-                            label="Status"
-                            options={statusOptions}
-                            value={status}
-                            onChange={(e) => { setStatus(e.target.value as AirdropStatus); markChanged(); }}
-                        />
-                    </div>
-                </div>
+                <Input
+                    id="name"
+                    label="Project Name"
+                    value={name}
+                    onChange={(e) => { setName(e.target.value); markChanged(); }}
+                />
 
                 <div className="grid grid-cols-2 gap-4">
                     <Input
@@ -139,19 +115,11 @@ export function AirdropInfo({ airdrop, onUpdate }: AirdropInfoProps) {
                 </div>
 
                 <Textarea
-                    id="tasks-summary"
-                    label="Tasks"
-                    value={tasksSummary}
-                    onChange={(e) => { setTasksSummary(e.target.value); markChanged(); }}
+                    id="steps-summary"
+                    label="Steps Summary"
+                    value={stepsSummary}
+                    onChange={(e) => { setStepsSummary(e.target.value); markChanged(); }}
                     rows={2}
-                />
-
-                <Textarea
-                    id="notes"
-                    label="Notes"
-                    value={notes}
-                    onChange={(e) => { setNotes(e.target.value); markChanged(); }}
-                    rows={3}
                 />
             </div>
         </div>
