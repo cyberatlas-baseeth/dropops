@@ -118,9 +118,6 @@ export function FinanceTable({ data }: FinanceTableProps) {
                                     >
                                         {row.name}
                                     </Link>
-                                    <span className="text-muted-foreground text-sm ml-2">
-                                        {row.network || ''}
-                                    </span>
                                 </td>
                                 <td className="px-4 py-3 text-right text-sm text-foreground">
                                     {formatCurrency(row.total_cost)}
@@ -157,7 +154,6 @@ export function FinanceTable({ data }: FinanceTableProps) {
                         <div className="flex items-start justify-between mb-3">
                             <div>
                                 <h3 className="font-medium text-foreground">{row.name}</h3>
-                                <p className="text-sm text-muted-foreground">{row.network || 'No network'}</p>
                             </div>
                             <span
                                 className={`text-lg font-semibold ${row.profit_loss >= 0 ? 'text-green-600' : 'text-red-600'
