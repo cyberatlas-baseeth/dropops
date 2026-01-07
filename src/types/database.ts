@@ -1,5 +1,9 @@
 export type AirdropStatus = 'todo' | 'in_progress' | 'completed';
 
+export type CostType = 'Gas Fee' | 'Other' | 'Claimed Reward';
+
+export type TaskType = 'Daily' | 'Weekly' | 'One-time';
+
 export interface Airdrop {
   id: string;
   wallet_address: string;
