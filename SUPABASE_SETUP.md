@@ -57,12 +57,13 @@ CREATE TABLE tasks (
   created_at timestamp with time zone DEFAULT now()
 );
 
--- Daily Tasks table (global daily tasks)
+-- Daily Tasks table (global daily tasks and to-do list)
 CREATE TABLE daily_tasks (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   wallet_address text NOT NULL,
   title text NOT NULL,
   is_completed boolean DEFAULT false,
+  task_type text DEFAULT 'daily',
   created_at timestamp with time zone DEFAULT now()
 );
 
