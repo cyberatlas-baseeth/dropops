@@ -9,6 +9,12 @@ interface AirdropCardProps {
     onStepToggle?: () => void;
 }
 
+function formatDate(dateStr: string | null): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
 export function AirdropCard({ airdrop, onStepToggle }: AirdropCardProps) {
     const toggleStep = async (e: React.MouseEvent, stepId: string, isCompleted: boolean) => {
         e.preventDefault();
@@ -38,11 +44,17 @@ export function AirdropCard({ airdrop, onStepToggle }: AirdropCardProps) {
                             <h3 className="font-semibold text-foreground text-sm hover:text-emerald-500 transition-colors">
                                 {airdrop.name}
                             </h3>
-                            {airdrop.total_steps > 0 && (
-                                <p className="text-xs text-muted-foreground">
-                                    {airdrop.completed_steps}/{airdrop.total_steps} steps
-                                </p>
-                            )}
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {airdrop.total_steps > 0 && (
+                                    <span>{airdrop.completed_steps}/{airdrop.total_steps} steps</span>
+                                )}
+                                {airdrop.last_updated && (
+                                    <>
+                                        <span>•</span>
+                                        <span>Updated {formatDate(airdrop.last_updated)}</span>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${airdrop.progress_percent === 100

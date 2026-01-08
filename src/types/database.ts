@@ -12,6 +12,11 @@ export interface Airdrop {
   funds: string | null;
   estimated_tge: string | null;
   estimated_value: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  total_cost: number;
+  claimed_reward: number;
+  farming_points: string | null;
   created_at: string;
 }
 
@@ -28,6 +33,7 @@ export interface AirdropWithSteps extends Airdrop {
   completed_steps: number;
   total_steps: number;
   progress_percent: number;
+  last_updated: string | null;
 }
 
 export interface DailyTask {
@@ -48,8 +54,6 @@ export interface Finance {
 }
 
 export interface AirdropWithFinance extends Airdrop {
-  total_cost: number;
-  claimed_reward: number;
   profit_loss: number;
   roi_percent: number;
 }

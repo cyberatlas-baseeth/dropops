@@ -37,6 +37,11 @@ CREATE TABLE airdrops (
   funds text,
   estimated_tge text,
   estimated_value text,
+  start_date date,
+  end_date date,
+  total_cost decimal(18,2) DEFAULT 0,
+  claimed_reward decimal(18,2) DEFAULT 0,
+  farming_points text,
   created_at timestamp with time zone DEFAULT now()
 );
 
@@ -65,7 +70,7 @@ CREATE TABLE daily_tasks (
 
 CREATE INDEX idx_daily_tasks_wallet ON daily_tasks(wallet_address);
 
--- Finance table
+-- Finance table (optional, for detailed tracking)
 CREATE TABLE finance (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   airdrop_id uuid REFERENCES airdrops(id) ON DELETE CASCADE,
@@ -80,6 +85,16 @@ ALTER TABLE airdrops DISABLE ROW LEVEL SECURITY;
 ALTER TABLE steps DISABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_tasks DISABLE ROW LEVEL SECURITY;
 ALTER TABLE finance DISABLE ROW LEVEL SECURITY;
+```
+
+## Add columns to existing table (if upgrading)
+
+```sql
+ALTER TABLE airdrops ADD COLUMN IF NOT EXISTS start_date date;
+ALTER TABLE airdrops ADD COLUMN IF NOT EXISTS end_date date;
+ALTER TABLE airdrops ADD COLUMN IF NOT EXISTS total_cost decimal(18,2) DEFAULT 0;
+ALTER TABLE airdrops ADD COLUMN IF NOT EXISTS claimed_reward decimal(18,2) DEFAULT 0;
+ALTER TABLE airdrops ADD COLUMN IF NOT EXISTS farming_points text;
 ```
 
 ⚠️ **Warning:** The `DROP TABLE` commands will delete existing data!

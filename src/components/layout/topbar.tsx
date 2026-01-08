@@ -8,6 +8,7 @@ const navItems = [
     { name: 'Dashboard', href: '/' },
     { name: 'Tasks', href: '/tasks' },
     { name: 'Finance', href: '/finance' },
+    { name: 'Monitor Farming', href: '/monitor-farming' },
 ];
 
 function truncateAddress(address: string) {

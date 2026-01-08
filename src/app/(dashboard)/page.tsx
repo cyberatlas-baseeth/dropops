@@ -8,6 +8,13 @@ import { Button } from '@/components/ui/button';
 import { AirdropCard } from '@/components/airdrops/airdrop-card';
 import { AddAirdropModal } from '@/components/airdrops/add-airdrop-modal';
 
+// Parse funds string to number for sorting
+function parseFunds(funds: string | null): number {
+    if (!funds) return 0;
+    const match = funds.replace(/[^0-9.]/g, '');
+    return parseFloat(match) || 0;
+}
+
 export default function DashboardPage() {
     const { address } = useWallet();
     const [airdrops, setAirdrops] = useState<AirdropWithSteps[]>([]);
@@ -26,12 +33,12 @@ export default function DashboardPage() {
             const { data: airdropData } = await supabase
                 .from('airdrops')
                 .select('*')
-                .eq('wallet_address', address.toLowerCase())
-                .order('created_at', { ascending: false });
+                .eq('wallet_address', address.toLowerCase());
 
             const { data: stepsData } = await supabase
                 .from('steps')
-                .select('*');
+                .select('*')
+                .order('created_at', { ascending: false });
 
             const airdropsRaw = (airdropData as Airdrop[]) || [];
             const stepsRaw = (stepsData as Step[]) || [];
@@ -41,6 +48,7 @@ export default function DashboardPage() {
                 const completedSteps = steps.filter(s => s.is_completed).length;
                 const totalSteps = steps.length;
                 const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+                const lastUpdated = steps.length > 0 ? steps[0].created_at : null;
 
                 return {
                     ...airdrop,
@@ -48,8 +56,12 @@ export default function DashboardPage() {
                     completed_steps: completedSteps,
                     total_steps: totalSteps,
                     progress_percent: progressPercent,
+                    last_updated: lastUpdated,
                 };
             });
+
+            // Sort by funds (descending)
+            airdropsWithSteps.sort((a, b) => parseFunds(b.funds) - parseFunds(a.funds));
 
             setAirdrops(airdropsWithSteps);
         } catch (error) {
