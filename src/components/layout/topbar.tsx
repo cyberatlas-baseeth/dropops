@@ -22,11 +22,8 @@ export function Topbar() {
         <header className="h-16 bg-card border-b border-border">
             <div className="h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-xs">DO</span>
-                    </div>
-                    <span className="font-semibold text-foreground">DropOps</span>
+                <Link href="/" className="flex items-center">
+                    <img src="/logo.png" alt="DropOps" className="h-8" />
                 </Link>
 
                 {/* Navigation */}
