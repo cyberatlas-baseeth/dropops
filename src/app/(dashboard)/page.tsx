@@ -5,23 +5,14 @@ import { createClient } from '@/lib/supabase/client';
 import { useWallet } from '@/context/wallet-context';
 import { Airdrop, Step, AirdropWithSteps } from '@/types/database';
 import { Button } from '@/components/ui/button';
-import { AirdropTable } from '@/components/airdrops/airdrop-table';
+import { AirdropCard } from '@/components/airdrops/airdrop-card';
 import { AddAirdropModal } from '@/components/airdrops/add-airdrop-modal';
-
-type TabType = 'todo' | 'in_progress' | 'completed';
-
-const tabs: { id: TabType; label: string }[] = [
-    { id: 'todo', label: 'To-Do' },
-    { id: 'in_progress', label: 'In Progress' },
-    { id: 'completed', label: 'Completed' },
-];
 
 export default function DashboardPage() {
     const { address } = useWallet();
     const [airdrops, setAirdrops] = useState<AirdropWithSteps[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<TabType>('todo');
 
     const fetchAirdrops = async () => {
         if (!address) {
@@ -72,15 +63,9 @@ export default function DashboardPage() {
         fetchAirdrops();
     }, [address]);
 
-    const filteredAirdrops = useMemo(() => {
-        return airdrops.filter((airdrop) => {
-            const percent = airdrop.progress_percent;
-            if (activeTab === 'todo') return percent === 0;
-            if (activeTab === 'in_progress') return percent > 0 && percent < 100;
-            if (activeTab === 'completed') return percent === 100;
-            return true;
-        });
-    }, [airdrops, activeTab]);
+    const todoAirdrops = useMemo(() => airdrops.filter(a => a.progress_percent === 0), [airdrops]);
+    const inProgressAirdrops = useMemo(() => airdrops.filter(a => a.progress_percent > 0 && a.progress_percent < 100), [airdrops]);
+    const completedAirdrops = useMemo(() => airdrops.filter(a => a.progress_percent === 100), [airdrops]);
 
     const handleAirdropAdded = () => {
         setIsModalOpen(false);
@@ -95,19 +80,30 @@ export default function DashboardPage() {
         );
     }
 
-    const todoCount = airdrops.filter(a => a.progress_percent === 0).length;
-    const inProgressCount = airdrops.filter(a => a.progress_percent > 0 && a.progress_percent < 100).length;
-    const completedCount = airdrops.filter(a => a.progress_percent === 100).length;
-
-    const getCounts = (tab: TabType) => {
-        if (tab === 'todo') return todoCount;
-        if (tab === 'in_progress') return inProgressCount;
-        if (tab === 'completed') return completedCount;
-        return 0;
-    };
+    const Column = ({ title, count, airdrops, color }: { title: string; count: number; airdrops: AirdropWithSteps[]; color: string }) => (
+        <div className="flex flex-col h-full">
+            <div className="flex items-center gap-3 mb-4">
+                <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+                <span className={`px-2 py-0.5 text-xs rounded-full ${color}`}>
+                    {count}
+                </span>
+            </div>
+            <div className="flex-1 space-y-4 overflow-y-auto">
+                {airdrops.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground text-sm border border-dashed border-border rounded-lg">
+                        No airdrops
+                    </div>
+                ) : (
+                    airdrops.map((airdrop) => (
+                        <AirdropCard key={airdrop.id} airdrop={airdrop} onStepToggle={fetchAirdrops} />
+                    ))
+                )}
+            </div>
+        </div>
+    );
 
     return (
-        <div>
+        <div className="h-full flex flex-col">
             {/* Page Header */}
             <div className="flex items-center justify-between mb-6">
                 <div>
@@ -121,27 +117,27 @@ export default function DashboardPage() {
                 </Button>
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-6 mb-6 border-b border-border">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
-                                ? 'border-emerald-500 text-emerald-500'
-                                : 'border-transparent text-muted-foreground hover:text-foreground'
-                            }`}
-                    >
-                        {tab.label}
-                        <span className="px-2 py-0.5 text-xs rounded-full bg-muted">
-                            {getCounts(tab.id)}
-                        </span>
-                    </button>
-                ))}
+            {/* 3-Column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+                <Column
+                    title="To-Do"
+                    count={todoAirdrops.length}
+                    airdrops={todoAirdrops}
+                    color="bg-blue-500/20 text-blue-400"
+                />
+                <Column
+                    title="In Progress"
+                    count={inProgressAirdrops.length}
+                    airdrops={inProgressAirdrops}
+                    color="bg-yellow-500/20 text-yellow-400"
+                />
+                <Column
+                    title="Completed"
+                    count={completedAirdrops.length}
+                    airdrops={completedAirdrops}
+                    color="bg-emerald-500/20 text-emerald-400"
+                />
             </div>
-
-            {/* Airdrop Grid */}
-            <AirdropTable airdrops={filteredAirdrops} onStepToggle={fetchAirdrops} />
 
             {/* Add Modal */}
             <AddAirdropModal
