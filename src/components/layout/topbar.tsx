@@ -23,7 +23,7 @@ export function Topbar() {
             <div className="h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center">
-                    <img src="/logo.png" alt="DropOps" className="h-8" />
+                    <img src="/logo.png" alt="DropOps" className="h-10" />
                 </Link>
 
                 {/* Navigation */}
