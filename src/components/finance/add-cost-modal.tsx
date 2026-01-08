@@ -9,9 +9,8 @@ import { Select } from '@/components/ui/select';
 import { Airdrop, CostType } from '@/types/database';
 
 const costTypeOptions = [
-    { value: 'Gas Fee', label: 'Gas Fee' },
-    { value: 'Other', label: 'Other Cost' },
-    { value: 'Claimed Reward', label: 'Claimed Reward' },
+    { value: 'Cost', label: 'Cost' },
+    { value: 'Reward', label: 'Reward' },
 ];
 
 interface AddCostModalProps {
@@ -23,7 +22,7 @@ interface AddCostModalProps {
 
 export function AddCostModal({ isOpen, onClose, airdrops, onSuccess }: AddCostModalProps) {
     const [airdropId, setAirdropId] = useState('');
-    const [costType, setCostType] = useState<CostType>('Gas Fee');
+    const [costType, setCostType] = useState<CostType>('Cost');
     const [amount, setAmount] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -52,7 +51,7 @@ export function AddCostModal({ isOpen, onClose, airdrops, onSuccess }: AddCostMo
             if (insertError) throw insertError;
 
             setAirdropId('');
-            setCostType('Gas Fee');
+            setCostType('Cost');
             setAmount('');
             onClose();
             onSuccess?.();

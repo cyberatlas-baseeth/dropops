@@ -37,7 +37,7 @@ export default function FinancePage() {
 
             ((financeData as Finance[]) || []).forEach((entry) => {
                 const existing = financeMap.get(entry.airdrop_id) || { costs: 0, rewards: 0 };
-                if (entry.cost_type === 'Claimed Reward') {
+                if (entry.cost_type === 'Reward') {
                     existing.rewards += Number(entry.amount);
                 } else {
                     existing.costs += Number(entry.amount);
