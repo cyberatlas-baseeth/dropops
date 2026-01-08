@@ -88,7 +88,7 @@ export default function DashboardPage() {
                     {count}
                 </span>
             </div>
-            <div className="flex-1 space-y-6 overflow-y-auto">
+            <div className="flex-1 space-y-8 overflow-y-auto">
                 {airdrops.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground text-sm border border-dashed border-border rounded-lg">
                         No airdrops
