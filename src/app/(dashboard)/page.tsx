@@ -122,18 +122,18 @@ export default function DashboardPage() {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-4 mb-6 border-b border-border">
+            <div className="flex gap-6 mb-6 border-b border-border">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
-                            ? 'border-emerald-500 text-emerald-500'
-                            : 'border-transparent text-muted-foreground hover:text-foreground'
+                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
+                                ? 'border-emerald-500 text-emerald-500'
+                                : 'border-transparent text-muted-foreground hover:text-foreground'
                             }`}
                     >
                         {tab.label}
-                        <span className="ml-3 px-2 py-0.5 text-xs rounded-full bg-muted">
+                        <span className="px-2 py-0.5 text-xs rounded-full bg-muted">
                             {getCounts(tab.id)}
                         </span>
                     </button>
