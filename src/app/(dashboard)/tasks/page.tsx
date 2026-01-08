@@ -23,6 +23,7 @@ interface TaskBoxProps {
     onAdd: () => void;
     onToggle: (taskId: string, isCompleted: boolean) => void;
     onDelete: (taskId: string) => void;
+    onReset?: () => void;
 }
 
 function TaskBox({
@@ -35,6 +36,7 @@ function TaskBox({
     onAdd,
     onToggle,
     onDelete,
+    onReset,
 }: TaskBoxProps) {
     const completedCount = tasks.filter(t => t.is_completed).length;
 
@@ -52,11 +54,21 @@ function TaskBox({
                     </p>
                 </div>
                 {tasks.length > 0 && (
-                    <div className="ml-auto w-24 h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all"
-                            style={{ width: `${tasks.length > 0 ? (completedCount / tasks.length) * 100 : 0}%` }}
-                        />
+                    <div className="ml-auto flex items-center gap-3">
+                        {onReset && (
+                            <button
+                                onClick={onReset}
+                                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                                Reset
+                            </button>
+                        )}
+                        <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all"
+                                style={{ width: `${tasks.length > 0 ? (completedCount / tasks.length) * 100 : 0}%` }}
+                            />
+                        </div>
                     </div>
                 )}
             </div>
@@ -248,6 +260,19 @@ export default function TasksPage() {
         }
     };
 
+    const resetDailyTasks = async () => {
+        try {
+            const supabase = createClient();
+            const dailyTaskIds = dailyTasks.map(t => t.id);
+            if (dailyTaskIds.length === 0) return;
+
+            await supabase.from('daily_tasks').update({ is_completed: false }).in('id', dailyTaskIds);
+            setDailyTasks(dailyTasks.map(t => ({ ...t, is_completed: false })));
+        } catch (error) {
+            console.error('Failed to reset tasks:', error);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center py-20">
@@ -284,6 +309,7 @@ export default function TasksPage() {
                     onAdd={addDailyTask}
                     onToggle={toggleDailyTask}
                     onDelete={deleteDailyTask}
+                    onReset={resetDailyTasks}
                 />
 
                 {/* To-Do List */}
