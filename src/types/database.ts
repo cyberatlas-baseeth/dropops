@@ -4,6 +4,8 @@ export type CostType = 'Cost' | 'Reward';
 
 export type TaskType = 'Daily' | 'Weekly' | 'One-time';
 
+export type WaitlistType = 'nft' | 'project';
+
 export interface Airdrop {
   id: string;
   wallet_address: string;
@@ -56,4 +58,13 @@ export interface Finance {
 export interface AirdropWithFinance extends Airdrop {
   profit_loss: number;
   roi_percent: number;
+}
+
+export interface WaitlistItem {
+  id: string;
+  wallet_address: string;
+  project_name: string;
+  date: string | null;
+  item_type: WaitlistType;
+  created_at: string;
 }

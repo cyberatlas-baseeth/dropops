@@ -95,6 +95,19 @@ ALTER TABLE airdrops ADD COLUMN IF NOT EXISTS end_date date;
 ALTER TABLE airdrops ADD COLUMN IF NOT EXISTS total_cost decimal(18,2) DEFAULT 0;
 ALTER TABLE airdrops ADD COLUMN IF NOT EXISTS claimed_reward decimal(18,2) DEFAULT 0;
 ALTER TABLE airdrops ADD COLUMN IF NOT EXISTS farming_points text;
+
+-- Waitlist table
+CREATE TABLE IF NOT EXISTS waitlist (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  wallet_address text NOT NULL,
+  project_name text NOT NULL,
+  date date,
+  item_type text DEFAULT 'project',
+  created_at timestamp with time zone DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_waitlist_wallet ON waitlist(wallet_address);
+ALTER TABLE waitlist DISABLE ROW LEVEL SECURITY;
 ```
 
 ⚠️ **Warning:** The `DROP TABLE` commands will delete existing data!

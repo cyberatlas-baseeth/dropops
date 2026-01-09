@@ -9,6 +9,7 @@ const navItems = [
     { name: 'Tasks', href: '/tasks' },
     { name: 'Finance', href: '/finance' },
     { name: 'Monitor Farming', href: '/monitor-farming' },
+    { name: 'Waitlist', href: '/waitlist' },
 ];
 
 function truncateAddress(address: string) {

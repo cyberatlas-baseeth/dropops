@@ -12,7 +12,7 @@ interface AirdropCardProps {
 function formatDate(dateStr: string | null): string {
     if (!dateStr) return '';
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 export function AirdropCard({ airdrop, onStepToggle }: AirdropCardProps) {
@@ -58,10 +58,10 @@ export function AirdropCard({ airdrop, onStepToggle }: AirdropCardProps) {
                         </div>
                     </div>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${airdrop.progress_percent === 100
-                            ? 'bg-emerald-500/20 text-emerald-400'
-                            : airdrop.progress_percent > 0
-                                ? 'bg-yellow-500/20 text-yellow-400'
-                                : 'bg-blue-500/20 text-blue-400'
+                        ? 'bg-emerald-500/20 text-emerald-400'
+                        : airdrop.progress_percent > 0
+                            ? 'bg-yellow-500/20 text-yellow-400'
+                            : 'bg-blue-500/20 text-blue-400'
                         }`}>
                         {airdrop.progress_percent}%
                     </span>
@@ -82,13 +82,13 @@ export function AirdropCard({ airdrop, onStepToggle }: AirdropCardProps) {
                     {airdrop.funds && (
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Funds:</span>
-                            <span className="text-foreground font-medium">{airdrop.funds}</span>
+                            <span className="text-foreground font-medium">${airdrop.funds}M</span>
                         </div>
                     )}
                     {airdrop.estimated_value && (
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Est. Value:</span>
-                            <span className="text-emerald-400 font-medium">{airdrop.estimated_value}</span>
+                            <span className="text-emerald-400 font-medium">${airdrop.estimated_value}</span>
                         </div>
                     )}
                 </div>
@@ -101,15 +101,15 @@ export function AirdropCard({ airdrop, onStepToggle }: AirdropCardProps) {
                         <div
                             key={step.id}
                             className={`flex items-center gap-2 p-1.5 rounded-md border transition-colors ${step.is_completed
-                                    ? 'bg-emerald-500/5 border-emerald-500/20'
-                                    : 'bg-background border-border'
+                                ? 'bg-emerald-500/5 border-emerald-500/20'
+                                : 'bg-background border-border'
                                 }`}
                         >
                             <button
                                 onClick={(e) => toggleStep(e, step.id, step.is_completed)}
                                 className={`w-3.5 h-3.5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0 ${step.is_completed
-                                        ? 'bg-emerald-500 border-emerald-500'
-                                        : 'border-muted-foreground/50 hover:border-emerald-500'
+                                    ? 'bg-emerald-500 border-emerald-500'
+                                    : 'border-muted-foreground/50 hover:border-emerald-500'
                                     }`}
                             >
                                 {step.is_completed && (
