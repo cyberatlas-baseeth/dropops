@@ -1,89 +1,89 @@
 # DropOps 🚀
 
-**Kripto airdrop projelerini takip etmek için modern bir web uygulaması.**
+**A modern web application for tracking crypto airdrop projects.**
 
 ![Next.js](https://img.shields.io/badge/Next.js-16.1.1-black?logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-38bdf8?logo=tailwindcss)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?logo=supabase)
 
-## ✨ Özellikler
+## ✨ Features
 
-- 🔐 **MetaMask ile Giriş** - Sign-In with Ethereum, gas ücreti yok
-- 📊 **Kanban Dashboard** - 3 sütunlu airdrop takibi (To-Do / In Progress / Completed)
-- ✅ **Adım Takibi** - Her airdrop için checklist ve ilerleme çubuğu
-- 📝 **Günlük Görevler** - Daily tasks ve to-do list
-- 💰 **Finansal Takip** - Maliyet, kazanç ve P/L hesaplaması
-- 🌾 **Farming Monitörü** - Farming puanı takibi
-- 📋 **Waitlist** - NFT mint ve proje waitlist takibi
-- 🌙 **Dark/Light Mode** - Otomatik tema desteği
+- 🔐 **MetaMask Login** - Sign-In with Ethereum, no gas fees
+- 📊 **Kanban Dashboard** - 3-column airdrop tracking (To-Do / In Progress / Completed)
+- ✅ **Step Tracking** - Checklist and progress bar for each airdrop
+- 📝 **Daily Tasks** - Daily tasks and to-do list management
+- 💰 **Financial Tracking** - Cost, reward and P/L calculation
+- 🌾 **Farming Monitor** - Farming points tracking
+- 📋 **Waitlist** - NFT mint and project waitlist tracking
+- 🌙 **Dark/Light Mode** - Automatic theme support
 
-## 🛠️ Teknoloji Stack
+## 🛠️ Tech Stack
 
-| Teknoloji | Açıklama |
-|-----------|----------|
+| Technology | Description |
+|------------|-------------|
 | [Next.js 16](https://nextjs.org/) | React framework (App Router) |
-| [TypeScript](https://www.typescriptlang.org/) | Tip güvenliği |
+| [TypeScript](https://www.typescriptlang.org/) | Type safety |
 | [TailwindCSS 4](https://tailwindcss.com/) | Utility-first CSS |
-| [Supabase](https://supabase.com/) | PostgreSQL veritabanı |
-| [ethers.js](https://docs.ethers.org/) | Ethereum wallet bağlantısı |
+| [Supabase](https://supabase.com/) | PostgreSQL database |
+| [ethers.js](https://docs.ethers.org/) | Ethereum wallet connection |
 
-## 🚀 Kurulum
+## 🚀 Getting Started
 
-### 1. Bağımlılıkları Yükle
+### 1. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Supabase Kurulumu
+### 2. Supabase Setup
 
-1. [Supabase](https://supabase.com/) hesabı oluştur
-2. Yeni proje oluştur
-3. SQL Editor'da [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) içindeki sorguları çalıştır
+1. Create a [Supabase](https://supabase.com/) account
+2. Create a new project
+3. Run the SQL queries from [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) in the SQL Editor
 
 ### 3. Environment Variables
 
-`.env.local` dosyası oluştur:
+Create a `.env.local` file:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-### 4. Geliştirme Sunucusunu Başlat
+### 4. Start Development Server
 
 ```bash
 npm run dev
 ```
 
-Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini aç.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📁 Proje Yapısı
+## 📁 Project Structure
 
 ```
 src/
 ├── app/                    # Next.js App Router
-│   ├── login/              # Giriş sayfası
-│   └── (dashboard)/        # Korumalı dashboard
-│       ├── page.tsx        # Ana sayfa (Airdrops)
-│       ├── airdrop/[id]/   # Airdrop detay
-│       ├── tasks/          # Görevler
-│       ├── finance/        # Finansal takip
-│       ├── monitor-farming/# Farming monitörü
+│   ├── login/              # Login page
+│   └── (dashboard)/        # Protected dashboard
+│       ├── page.tsx        # Main page (Airdrops)
+│       ├── airdrop/[id]/   # Airdrop detail
+│       ├── tasks/          # Tasks
+│       ├── finance/        # Financial tracking
+│       ├── monitor-farming/# Farming monitor
 │       └── waitlist/       # Waitlist
-├── components/             # React componentleri
-│   ├── airdrops/           # Airdrop kartları, modaller
-│   ├── auth/               # Login componentleri
+├── components/             # React components
+│   ├── airdrops/           # Airdrop cards, modals
+│   ├── auth/               # Login components
 │   ├── layout/             # Topbar
 │   └── ui/                 # Button, Input, Modal
 ├── context/                # React Context (Wallet)
 ├── lib/                    # Utilities
 │   ├── supabase/           # Supabase client
 │   └── wallet/             # Wallet config
-└── types/                  # TypeScript tipleri
+└── types/                  # TypeScript types
 ```
 
-## 📜 Lisans
+## 📜 License
 
 MIT License
