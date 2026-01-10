@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 interface WalletContextType {
     address: string | null;
     isConnecting: boolean;
+    isHydrated: boolean;
     error: string | null;
     connect: () => Promise<void>;
     disconnect: () => void;
@@ -19,6 +20,7 @@ const WalletContext = createContext<WalletContextType | null>(null);
 export function WalletProvider({ children }: { children: ReactNode }) {
     const [address, setAddress] = useState<string | null>(null);
     const [isConnecting, setIsConnecting] = useState(false);
+    const [isHydrated, setIsHydrated] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     // Check for existing session on mount
@@ -37,6 +39,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
                 localStorage.removeItem(WALLET_CONFIG.SESSION_KEY);
             }
         }
+        setIsHydrated(true);
     }, []);
 
     // Listen for account changes
@@ -133,6 +136,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             value={{
                 address,
                 isConnecting,
+                isHydrated,
                 error,
                 connect,
                 disconnect,

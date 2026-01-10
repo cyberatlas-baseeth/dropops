@@ -6,15 +6,24 @@ import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 
 export function ConnectWallet() {
-    const { connect, isConnecting, error, isConnected } = useWallet();
+    const { connect, isConnecting, error, isConnected, isHydrated } = useWallet();
     const router = useRouter();
 
     useEffect(() => {
-        if (isConnected) {
+        // Only redirect after hydration is complete
+        if (isHydrated && isConnected) {
             router.push('/');
-            router.refresh();
         }
-    }, [isConnected, router]);
+    }, [isHydrated, isConnected, router]);
+
+    // Show loading while hydrating or redirecting
+    if (!isHydrated || isConnected) {
+        return (
+            <div className="flex items-center justify-center min-h-[200px]">
+                <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="w-full max-w-sm mx-auto">
