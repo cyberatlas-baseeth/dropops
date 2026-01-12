@@ -6,6 +6,8 @@ export type TaskType = 'Daily' | 'Weekly' | 'One-time';
 
 export type WaitlistType = 'nft' | 'project';
 
+export type AirdropLabel = 'tracking' | 'claimed' | 'garbage' | null;
+
 export interface Airdrop {
   id: string;
   wallet_address: string;
@@ -19,6 +21,7 @@ export interface Airdrop {
   total_cost: number;
   claimed_reward: number;
   farming_points: string | null;
+  label: AirdropLabel;
   created_at: string;
 }
 

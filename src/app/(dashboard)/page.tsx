@@ -15,6 +15,13 @@ function parseFunds(funds: string | null): number {
     return parseFloat(match) || 0;
 }
 
+// Parse estimated value string to number
+function parseEstimatedValue(value: string | null): number {
+    if (!value) return 0;
+    const match = value.replace(/[^0-9.]/g, '');
+    return parseFloat(match) || 0;
+}
+
 export default function DashboardPage() {
     const { address } = useWallet();
     const [airdrops, setAirdrops] = useState<AirdropWithSteps[]>([]);
@@ -75,9 +82,26 @@ export default function DashboardPage() {
         fetchAirdrops();
     }, [address]);
 
-    const todoAirdrops = useMemo(() => airdrops.filter(a => a.progress_percent === 0), [airdrops]);
-    const inProgressAirdrops = useMemo(() => airdrops.filter(a => a.progress_percent > 0 && a.progress_percent < 100), [airdrops]);
-    const completedAirdrops = useMemo(() => airdrops.filter(a => a.progress_percent === 100), [airdrops]);
+    // Filter airdrops by status and label
+    const todoAirdrops = useMemo(() =>
+        airdrops.filter(a => a.progress_percent === 0 && !['claimed', 'garbage'].includes(a.label ?? '')),
+        [airdrops]);
+    const inProgressAirdrops = useMemo(() =>
+        airdrops.filter(a => a.progress_percent > 0 && a.progress_percent < 100 && !['claimed', 'garbage'].includes(a.label ?? '')),
+        [airdrops]);
+    const completedAirdrops = useMemo(() =>
+        airdrops.filter(a => a.progress_percent === 100 && !['claimed', 'garbage'].includes(a.label ?? '')),
+        [airdrops]);
+    const archivedAirdrops = useMemo(() =>
+        airdrops.filter(a => ['claimed', 'garbage'].includes(a.label ?? '')),
+        [airdrops]);
+
+    // Calculate total estimated value (excluding archived)
+    const totalEstimatedValue = useMemo(() => {
+        return airdrops
+            .filter(a => !['claimed', 'garbage'].includes(a.label ?? ''))
+            .reduce((sum, a) => sum + parseEstimatedValue(a.estimated_value), 0);
+    }, [airdrops]);
 
     const handleAirdropAdded = () => {
         setIsModalOpen(false);
@@ -100,7 +124,7 @@ export default function DashboardPage() {
                     {count}
                 </span>
             </div>
-            <div className="flex-1 space-y-8 overflow-y-auto">
+            <div className="flex-1 space-y-6 overflow-y-auto">
                 {airdrops.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground text-sm border border-dashed border-border rounded-lg">
                         No airdrops
@@ -124,9 +148,18 @@ export default function DashboardPage() {
                         Track and manage your airdrop projects
                     </p>
                 </div>
-                <Button onClick={() => setIsModalOpen(true)}>
-                    + Add Airdrop
-                </Button>
+                <div className="flex items-center gap-4">
+                    {/* Total Estimated Value */}
+                    <div className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg">
+                        <span className="text-sm text-muted-foreground">Total Est. Value:</span>
+                        <span className="text-lg font-bold text-emerald-400">
+                            ${totalEstimatedValue.toLocaleString()}
+                        </span>
+                    </div>
+                    <Button onClick={() => setIsModalOpen(true)}>
+                        + Add Airdrop
+                    </Button>
+                </div>
             </div>
 
             {/* 3-Column Layout */}
@@ -143,12 +176,32 @@ export default function DashboardPage() {
                     airdrops={inProgressAirdrops}
                     color="bg-yellow-500/20 text-yellow-400"
                 />
-                <Column
-                    title="Completed"
-                    count={completedAirdrops.length}
-                    airdrops={completedAirdrops}
-                    color="bg-emerald-500/20 text-emerald-400"
-                />
+                <div className="flex flex-col h-full">
+                    {/* Completed Section */}
+                    <Column
+                        title="Completed"
+                        count={completedAirdrops.length}
+                        airdrops={completedAirdrops}
+                        color="bg-emerald-500/20 text-emerald-400"
+                    />
+
+                    {/* Archived Section */}
+                    {archivedAirdrops.length > 0 && (
+                        <div className="mt-6 pt-6 border-t border-border">
+                            <div className="flex items-center gap-3 mb-4">
+                                <h2 className="text-lg font-semibold text-muted-foreground">Archived</h2>
+                                <span className="px-2 py-0.5 text-xs rounded-full bg-gray-500/20 text-gray-400">
+                                    {archivedAirdrops.length}
+                                </span>
+                            </div>
+                            <div className="space-y-6 overflow-y-auto opacity-70">
+                                {archivedAirdrops.map((airdrop) => (
+                                    <AirdropCard key={airdrop.id} airdrop={airdrop} onStepToggle={fetchAirdrops} />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Add Modal */}

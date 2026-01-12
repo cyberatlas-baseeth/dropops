@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { AirdropWithSteps } from '@/types/database';
+import { AirdropWithSteps, AirdropLabel } from '@/types/database';
 import Link from 'next/link';
 
 interface AirdropCardProps {
@@ -15,7 +16,16 @@ function formatDate(dateStr: string | null): string {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+const labelConfig: Record<string, { bg: string; text: string; icon: string }> = {
+    tracking: { bg: 'bg-blue-500/20', text: 'text-blue-400', icon: '📡' },
+    claimed: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', icon: '✅' },
+    garbage: { bg: 'bg-red-500/20', text: 'text-red-400', icon: '🗑️' },
+};
+
 export function AirdropCard({ airdrop, onStepToggle }: AirdropCardProps) {
+    const [showLabelMenu, setShowLabelMenu] = useState(false);
+    const [currentLabel, setCurrentLabel] = useState<AirdropLabel>(airdrop.label);
+
     const toggleStep = async (e: React.MouseEvent, stepId: string, isCompleted: boolean) => {
         e.preventDefault();
         e.stopPropagation();
@@ -29,8 +39,29 @@ export function AirdropCard({ airdrop, onStepToggle }: AirdropCardProps) {
         }
     };
 
+    const updateLabel = async (e: React.MouseEvent, newLabel: AirdropLabel) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        try {
+            const supabase = createClient();
+            await supabase.from('airdrops').update({ label: newLabel }).eq('id', airdrop.id);
+            setCurrentLabel(newLabel);
+            setShowLabelMenu(false);
+            onStepToggle?.();
+        } catch (error) {
+            console.error('Failed to update label:', error);
+        }
+    };
+
+    const handleLabelClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setShowLabelMenu(!showLabelMenu);
+    };
+
     return (
-        <div className="bg-card border border-border rounded-xl p-4 hover:border-emerald-500/50 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/5">
+        <div className="bg-card border-2 border-border rounded-xl p-4 hover:border-emerald-500/50 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/5">
             {/* Header */}
             <Link href={`/airdrop/${airdrop.id}`} className="block">
                 <div className="flex items-start justify-between mb-3">
@@ -57,14 +88,66 @@ export function AirdropCard({ airdrop, onStepToggle }: AirdropCardProps) {
                             </div>
                         </div>
                     </div>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${airdrop.progress_percent === 100
-                        ? 'bg-emerald-500/20 text-emerald-400'
-                        : airdrop.progress_percent > 0
-                            ? 'bg-yellow-500/20 text-yellow-400'
-                            : 'bg-blue-500/20 text-blue-400'
-                        }`}>
-                        {airdrop.progress_percent}%
-                    </span>
+                    <div className="flex items-center gap-2">
+                        {/* Label Badge */}
+                        <div className="relative">
+                            <button
+                                onClick={handleLabelClick}
+                                className={`px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${currentLabel && labelConfig[currentLabel]
+                                        ? `${labelConfig[currentLabel].bg} ${labelConfig[currentLabel].text}`
+                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                    }`}
+                            >
+                                {currentLabel && labelConfig[currentLabel] ? (
+                                    <span>{labelConfig[currentLabel].icon} {currentLabel}</span>
+                                ) : (
+                                    <span>+ label</span>
+                                )}
+                            </button>
+
+                            {/* Label Dropdown */}
+                            {showLabelMenu && (
+                                <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg z-50 min-w-[120px]">
+                                    <button
+                                        onClick={(e) => updateLabel(e, 'tracking')}
+                                        className="w-full px-3 py-2 text-left text-xs hover:bg-muted/50 flex items-center gap-2"
+                                    >
+                                        <span>📡</span> Tracking
+                                    </button>
+                                    <button
+                                        onClick={(e) => updateLabel(e, 'claimed')}
+                                        className="w-full px-3 py-2 text-left text-xs hover:bg-muted/50 flex items-center gap-2"
+                                    >
+                                        <span>✅</span> Claimed
+                                    </button>
+                                    <button
+                                        onClick={(e) => updateLabel(e, 'garbage')}
+                                        className="w-full px-3 py-2 text-left text-xs hover:bg-muted/50 flex items-center gap-2"
+                                    >
+                                        <span>🗑️</span> Garbage
+                                    </button>
+                                    {currentLabel && (
+                                        <button
+                                            onClick={(e) => updateLabel(e, null)}
+                                            className="w-full px-3 py-2 text-left text-xs hover:bg-muted/50 text-muted-foreground border-t border-border"
+                                        >
+                                            Remove label
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Progress Badge */}
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${airdrop.progress_percent === 100
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : airdrop.progress_percent > 0
+                                ? 'bg-yellow-500/20 text-yellow-400'
+                                : 'bg-blue-500/20 text-blue-400'
+                            }`}>
+                            {airdrop.progress_percent}%
+                        </span>
+                    </div>
                 </div>
 
                 {/* Progress Bar */}

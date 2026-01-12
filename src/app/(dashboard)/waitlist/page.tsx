@@ -62,6 +62,19 @@ export default function WaitlistPage() {
         }
     };
 
+    const updateItemType = async (id: string, newType: WaitlistType) => {
+        try {
+            const supabase = createClient();
+            await supabase.from('waitlist').update({ item_type: newType }).eq('id', id);
+            // Update local state immediately for better UX
+            setItems(items.map(item =>
+                item.id === id ? { ...item, item_type: newType } : item
+            ));
+        } catch (error) {
+            console.error('Failed to update item type:', error);
+        }
+    };
+
     const deleteItem = async (id: string) => {
         try {
             const supabase = createClient();
@@ -167,12 +180,17 @@ export default function WaitlistPage() {
                                         <span className="text-sm text-muted-foreground">{formatDate(item.date)}</span>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${item.item_type === 'nft'
+                                        <select
+                                            value={item.item_type}
+                                            onChange={(e) => updateItemType(item.id, e.target.value as WaitlistType)}
+                                            className={`px-2 py-0.5 rounded-full text-xs font-medium cursor-pointer border-0 focus:outline-none focus:ring-2 focus:ring-purple-500/50 ${item.item_type === 'nft'
                                                 ? 'bg-pink-500/20 text-pink-400'
                                                 : 'bg-purple-500/20 text-purple-400'
-                                            }`}>
-                                            {item.item_type === 'nft' ? 'NFT' : 'Project'}
-                                        </span>
+                                                }`}
+                                        >
+                                            <option value="project" className="bg-card text-foreground">Project</option>
+                                            <option value="nft" className="bg-card text-foreground">NFT</option>
+                                        </select>
                                     </td>
                                     <td className="px-4 py-3 text-right">
                                         <button
