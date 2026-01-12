@@ -92,9 +92,13 @@ export default function DashboardPage() {
     const completedAirdrops = useMemo(() =>
         airdrops.filter(a => a.progress_percent === 100 && !['claimed', 'garbage'].includes(a.label ?? '')),
         [airdrops]);
-    const archivedAirdrops = useMemo(() =>
-        airdrops.filter(a => ['claimed', 'garbage'].includes(a.label ?? '')),
+    const claimedAirdrops = useMemo(() =>
+        airdrops.filter(a => a.label === 'claimed'),
         [airdrops]);
+    const garbageAirdrops = useMemo(() =>
+        airdrops.filter(a => a.label === 'garbage'),
+        [airdrops]);
+    const archivedCount = claimedAirdrops.length + garbageAirdrops.length;
 
     // Calculate total estimated value (excluding archived)
     const totalEstimatedValue = useMemo(() => {
@@ -186,19 +190,44 @@ export default function DashboardPage() {
                     />
 
                     {/* Archived Section */}
-                    {archivedAirdrops.length > 0 && (
+                    {archivedCount > 0 && (
                         <div className="mt-6 pt-6 border-t border-border">
                             <div className="flex items-center gap-3 mb-4">
                                 <h2 className="text-lg font-semibold text-muted-foreground">Archived</h2>
                                 <span className="px-2 py-0.5 text-xs rounded-full bg-gray-500/20 text-gray-400">
-                                    {archivedAirdrops.length}
+                                    {archivedCount}
                                 </span>
                             </div>
-                            <div className="space-y-6 overflow-y-auto opacity-70">
-                                {archivedAirdrops.map((airdrop) => (
-                                    <AirdropCard key={airdrop.id} airdrop={airdrop} onStepToggle={fetchAirdrops} />
-                                ))}
-                            </div>
+
+                            {/* Claimed Group */}
+                            {claimedAirdrops.length > 0 && (
+                                <div className="mb-4">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <span className="text-xs font-medium text-emerald-400">✅ Claimed</span>
+                                        <span className="text-xs text-muted-foreground">({claimedAirdrops.length})</span>
+                                    </div>
+                                    <div className="space-y-6 opacity-70">
+                                        {claimedAirdrops.map((airdrop) => (
+                                            <AirdropCard key={airdrop.id} airdrop={airdrop} onStepToggle={fetchAirdrops} />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Garbage Group */}
+                            {garbageAirdrops.length > 0 && (
+                                <div>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <span className="text-xs font-medium text-red-400">🗑️ Garbage</span>
+                                        <span className="text-xs text-muted-foreground">({garbageAirdrops.length})</span>
+                                    </div>
+                                    <div className="space-y-6 opacity-50">
+                                        {garbageAirdrops.map((airdrop) => (
+                                            <AirdropCard key={airdrop.id} airdrop={airdrop} onStepToggle={fetchAirdrops} />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
