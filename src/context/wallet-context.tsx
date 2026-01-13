@@ -101,13 +101,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             // Save user to Supabase
             await saveUserToSupabase(walletAddress);
 
-            // Save session locally
+            // Save session locally (use lowercase for consistency)
+            const normalizedAddress = walletAddress.toLowerCase();
             const session: WalletSession = {
-                address: walletAddress,
+                address: normalizedAddress,
                 connectedAt: Date.now(),
             };
             localStorage.setItem(WALLET_CONFIG.SESSION_KEY, JSON.stringify(session));
-            setAddress(walletAddress);
+            setAddress(normalizedAddress);
         } catch (err) {
             if (err instanceof Error) {
                 if (err.message.includes('user rejected')) {
