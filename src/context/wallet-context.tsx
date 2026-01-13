@@ -127,6 +127,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const disconnect = () => {
         localStorage.removeItem(WALLET_CONFIG.SESSION_KEY);
         setAddress(null);
+        // Redirect to login page
+        if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+        }
     };
 
     return (
