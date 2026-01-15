@@ -1,9 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useWallet } from '@/context/wallet-context';
-import { WaitlistItem, WaitlistType } from '@/types/database';
+import { WaitlistItem, WaitlistType, WaitlistLabel } from '@/types/database';
+
+const labelConfig: Record<string, { bg: string; text: string; icon: string }> = {
+    tracking: { bg: 'bg-blue-500/20', text: 'text-blue-400', icon: '📡' },
+    claimed: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', icon: '✅' },
+    garbage: { bg: 'bg-red-500/20', text: 'text-red-400', icon: '🗑️' },
+};
 
 export default function WaitlistPage() {
     const { address } = useWallet();
@@ -40,6 +46,18 @@ export default function WaitlistPage() {
         fetchItems();
     }, [address]);
 
+    // Filter items by label
+    const activeItems = useMemo(() =>
+        items.filter(i => !['claimed', 'garbage'].includes(i.label ?? '')),
+        [items]);
+    const claimedItems = useMemo(() =>
+        items.filter(i => i.label === 'claimed'),
+        [items]);
+    const garbageItems = useMemo(() =>
+        items.filter(i => i.label === 'garbage'),
+        [items]);
+    const archivedCount = claimedItems.length + garbageItems.length;
+
     const addItem = async () => {
         if (!address || !newItem.project_name.trim()) return;
         setAdding(true);
@@ -66,12 +84,23 @@ export default function WaitlistPage() {
         try {
             const supabase = createClient();
             await supabase.from('waitlist').update({ item_type: newType }).eq('id', id);
-            // Update local state immediately for better UX
             setItems(items.map(item =>
                 item.id === id ? { ...item, item_type: newType } : item
             ));
         } catch (error) {
             console.error('Failed to update item type:', error);
+        }
+    };
+
+    const updateItemLabel = async (id: string, newLabel: WaitlistLabel) => {
+        try {
+            const supabase = createClient();
+            await supabase.from('waitlist').update({ label: newLabel }).eq('id', id);
+            setItems(items.map(item =>
+                item.id === id ? { ...item, label: newLabel } : item
+            ));
+        } catch (error) {
+            console.error('Failed to update item label:', error);
         }
     };
 
@@ -98,6 +127,68 @@ export default function WaitlistPage() {
             </div>
         );
     }
+
+    const ItemRow = ({ item, isArchived = false }: { item: WaitlistItem; isArchived?: boolean }) => (
+        <tr className={`border-b border-border last:border-0 hover:bg-muted/30 ${isArchived ? 'opacity-70' : ''}`}>
+            <td className="px-4 py-3">
+                <span className="font-medium text-foreground">{item.project_name}</span>
+            </td>
+            <td className="px-4 py-3">
+                <span className="text-sm text-muted-foreground">{formatDate(item.date)}</span>
+            </td>
+            <td className="px-4 py-3">
+                <select
+                    value={item.item_type}
+                    onChange={(e) => updateItemType(item.id, e.target.value as WaitlistType)}
+                    className={`px-2 py-0.5 rounded-full text-xs font-medium cursor-pointer border-0 focus:outline-none focus:ring-2 focus:ring-purple-500/50 ${item.item_type === 'nft'
+                        ? 'bg-pink-500/20 text-pink-400'
+                        : 'bg-purple-500/20 text-purple-400'
+                        }`}
+                >
+                    <option value="project" className="bg-card text-foreground">Project</option>
+                    <option value="nft" className="bg-card text-foreground">NFT</option>
+                </select>
+            </td>
+            <td className="px-4 py-3">
+                <select
+                    value={item.label ?? ''}
+                    onChange={(e) => updateItemLabel(item.id, (e.target.value || null) as WaitlistLabel)}
+                    className={`px-2 py-0.5 rounded-full text-xs font-medium cursor-pointer border-0 focus:outline-none focus:ring-2 focus:ring-purple-500/50 ${item.label && labelConfig[item.label]
+                            ? `${labelConfig[item.label].bg} ${labelConfig[item.label].text}`
+                            : 'bg-muted text-muted-foreground'
+                        }`}
+                >
+                    <option value="" className="bg-card text-foreground">No label</option>
+                    <option value="tracking" className="bg-card text-foreground">📡 Tracking</option>
+                    <option value="claimed" className="bg-card text-foreground">✅ Claimed</option>
+                    <option value="garbage" className="bg-card text-foreground">🗑️ Garbage</option>
+                </select>
+            </td>
+            <td className="px-4 py-3 text-right">
+                <button
+                    onClick={() => deleteItem(item.id)}
+                    className="p-1 text-muted-foreground hover:text-red-500 transition-colors"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </td>
+        </tr>
+    );
+
+    const TableHeader = () => (
+        <thead>
+            <tr className="border-b border-border bg-muted/50">
+                <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Project</th>
+                <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Date</th>
+                <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Type</th>
+                <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Label</th>
+                <th className="text-right px-4 py-3 text-sm font-medium text-muted-foreground">Actions</th>
+            </tr>
+        </thead>
+    );
 
     return (
         <>
@@ -152,63 +243,77 @@ export default function WaitlistPage() {
                 </div>
             )}
 
-            {/* Waitlist Table */}
+            {/* Active Waitlist Table */}
             <div className="bg-card border border-border rounded-xl overflow-hidden">
                 <table className="w-full">
-                    <thead>
-                        <tr className="border-b border-border bg-muted/50">
-                            <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Project</th>
-                            <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Date</th>
-                            <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Type</th>
-                            <th className="text-right px-4 py-3 text-sm font-medium text-muted-foreground">Actions</th>
-                        </tr>
-                    </thead>
+                    <TableHeader />
                     <tbody>
-                        {items.length === 0 ? (
+                        {activeItems.length === 0 ? (
                             <tr>
-                                <td colSpan={4} className="text-center py-8 text-muted-foreground">
-                                    No items in your waitlist
+                                <td colSpan={5} className="text-center py-8 text-muted-foreground">
+                                    No active items in your waitlist
                                 </td>
                             </tr>
                         ) : (
-                            items.map((item) => (
-                                <tr key={item.id} className="border-b border-border last:border-0 hover:bg-muted/30">
-                                    <td className="px-4 py-3">
-                                        <span className="font-medium text-foreground">{item.project_name}</span>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <span className="text-sm text-muted-foreground">{formatDate(item.date)}</span>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <select
-                                            value={item.item_type}
-                                            onChange={(e) => updateItemType(item.id, e.target.value as WaitlistType)}
-                                            className={`px-2 py-0.5 rounded-full text-xs font-medium cursor-pointer border-0 focus:outline-none focus:ring-2 focus:ring-purple-500/50 ${item.item_type === 'nft'
-                                                ? 'bg-pink-500/20 text-pink-400'
-                                                : 'bg-purple-500/20 text-purple-400'
-                                                }`}
-                                        >
-                                            <option value="project" className="bg-card text-foreground">Project</option>
-                                            <option value="nft" className="bg-card text-foreground">NFT</option>
-                                        </select>
-                                    </td>
-                                    <td className="px-4 py-3 text-right">
-                                        <button
-                                            onClick={() => deleteItem(item.id)}
-                                            className="p-1 text-muted-foreground hover:text-red-500 transition-colors"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <line x1="18" y1="6" x2="6" y2="18" />
-                                                <line x1="6" y1="6" x2="18" y2="18" />
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
+                            activeItems.map((item) => (
+                                <ItemRow key={item.id} item={item} />
                             ))
                         )}
                     </tbody>
                 </table>
             </div>
+
+            {/* Archived Section */}
+            {archivedCount > 0 && (
+                <div className="mt-8">
+                    <div className="flex items-center gap-3 mb-4">
+                        <h2 className="text-lg font-semibold text-muted-foreground">Archived</h2>
+                        <span className="px-2 py-0.5 text-xs rounded-full bg-gray-500/20 text-gray-400">
+                            {archivedCount}
+                        </span>
+                    </div>
+
+                    {/* Claimed Group */}
+                    {claimedItems.length > 0 && (
+                        <div className="mb-4">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xs font-medium text-emerald-400">✅ Claimed</span>
+                                <span className="text-xs text-muted-foreground">({claimedItems.length})</span>
+                            </div>
+                            <div className="bg-card border border-border rounded-xl overflow-hidden opacity-70">
+                                <table className="w-full">
+                                    <TableHeader />
+                                    <tbody>
+                                        {claimedItems.map((item) => (
+                                            <ItemRow key={item.id} item={item} isArchived />
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Garbage Group */}
+                    {garbageItems.length > 0 && (
+                        <div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xs font-medium text-red-400">🗑️ Garbage</span>
+                                <span className="text-xs text-muted-foreground">({garbageItems.length})</span>
+                            </div>
+                            <div className="bg-card border border-border rounded-xl overflow-hidden opacity-50">
+                                <table className="w-full">
+                                    <TableHeader />
+                                    <tbody>
+                                        {garbageItems.map((item) => (
+                                            <ItemRow key={item.id} item={item} isArchived />
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
         </>
     );
 }

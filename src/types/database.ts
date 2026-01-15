@@ -63,11 +63,15 @@ export interface AirdropWithFinance extends Airdrop {
   roi_percent: number;
 }
 
+export type WaitlistLabel = 'tracking' | 'claimed' | 'garbage' | null;
+
 export interface WaitlistItem {
   id: string;
   wallet_address: string;
   project_name: string;
   date: string | null;
   item_type: WaitlistType;
+  label: WaitlistLabel;
   created_at: string;
 }
+
