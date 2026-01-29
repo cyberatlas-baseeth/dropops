@@ -174,7 +174,7 @@ export default function DashboardPage() {
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
                         >
                             <circle cx="11" cy="11" r="8" />
                             <path d="m21 21-4.3-4.3" />
@@ -184,7 +184,7 @@ export default function DashboardPage() {
                             placeholder="Search projects..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-9 pr-4 py-2 w-56 bg-card border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                            className="pl-8 pr-4 py-2 w-56 bg-card border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                         />
                     </div>
                     {/* Total Estimated Value */}
