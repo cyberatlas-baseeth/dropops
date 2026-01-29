@@ -27,6 +27,7 @@ export default function DashboardPage() {
     const [airdrops, setAirdrops] = useState<AirdropWithSteps[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const fetchAirdrops = async () => {
         if (!address) {
@@ -82,22 +83,30 @@ export default function DashboardPage() {
         fetchAirdrops();
     }, [address]);
 
+    // Filter airdrops by search query first
+    const filteredAirdrops = useMemo(() => {
+        if (!searchQuery.trim()) return airdrops;
+        return airdrops.filter(a =>
+            a.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [airdrops, searchQuery]);
+
     // Filter airdrops by status and label
     const todoAirdrops = useMemo(() =>
-        airdrops.filter(a => a.progress_percent === 0 && !['claimed', 'garbage'].includes(a.label ?? '')),
-        [airdrops]);
+        filteredAirdrops.filter(a => a.progress_percent === 0 && !['claimed', 'garbage'].includes(a.label ?? '')),
+        [filteredAirdrops]);
     const inProgressAirdrops = useMemo(() =>
-        airdrops.filter(a => a.progress_percent > 0 && a.progress_percent < 100 && !['claimed', 'garbage'].includes(a.label ?? '')),
-        [airdrops]);
+        filteredAirdrops.filter(a => a.progress_percent > 0 && a.progress_percent < 100 && !['claimed', 'garbage'].includes(a.label ?? '')),
+        [filteredAirdrops]);
     const completedAirdrops = useMemo(() =>
-        airdrops.filter(a => a.progress_percent === 100 && !['claimed', 'garbage'].includes(a.label ?? '')),
-        [airdrops]);
+        filteredAirdrops.filter(a => a.progress_percent === 100 && !['claimed', 'garbage'].includes(a.label ?? '')),
+        [filteredAirdrops]);
     const claimedAirdrops = useMemo(() =>
-        airdrops.filter(a => a.label === 'claimed'),
-        [airdrops]);
+        filteredAirdrops.filter(a => a.label === 'claimed'),
+        [filteredAirdrops]);
     const garbageAirdrops = useMemo(() =>
-        airdrops.filter(a => a.label === 'garbage'),
-        [airdrops]);
+        filteredAirdrops.filter(a => a.label === 'garbage'),
+        [filteredAirdrops]);
     const archivedCount = claimedAirdrops.length + garbageAirdrops.length;
 
     // Calculate total estimated value (excluding archived)
@@ -153,6 +162,31 @@ export default function DashboardPage() {
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
+                    {/* Search Input */}
+                    <div className="relative">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                        >
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.3-4.3" />
+                        </svg>
+                        <input
+                            type="text"
+                            placeholder="Search projects..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-9 pr-4 py-2 w-56 bg-card border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                        />
+                    </div>
                     {/* Total Estimated Value */}
                     <div className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg">
                         <span className="text-sm text-muted-foreground">Total Est. Value:</span>
